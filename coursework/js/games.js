@@ -79,7 +79,31 @@ var playerProperties = {
 //     form: 'base_form_shooting'
 // }
 
+class Enemy{
+    static children = [];
+    constructor(enemyObject){
+        this.enemy = enemyObject;
+        this.health = 400;
+        this.isGreen = false;
+        this.isRed = false;
+        this.flickerCount = 0;
+        this.flickerStop = 2;
+        this.greenCount = 0;
+        this.redCount = 0;
+        this.form = 'normal';
+    }
 
+    static addEnemy(enemyObject) {
+        this.children.push(enemyObject);
+    }
+
+
+    static removeEnemy(enemyObject) {
+        this.children.pop(enemyObject);
+    }
+    
+
+}
 
 
 function preload ()
