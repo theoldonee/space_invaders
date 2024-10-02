@@ -46,37 +46,40 @@ window.onload = function (){
 
 var score = 0;;
 var jump = 200;
-var frame_rate = 5;
+var frameRate = 5;
 var scoreText;
-var form = 'base_form_shooting';
 var count = 0;
 var paused = false;
-var contact_health = false;
+var contactHealth = false;
 var player;
+var enemy;
+var healthPowerup;
 
-var player_properties = {
+var playerProperties = {
     object : player,
     health: 400,
-    is_green: false,
-    is_red: false,
-    flicker_count: 0,
-    flicker_stop: 2,
-    green_count: 0,
-    red_count: 0,
+    isGreen: false,
+    isRed: false,
+    flickerCount: 0,
+    flickerStop: 2,
+    greenCount: 0,
+    redCount: 0,
     form: 'base_form_shooting'
 }
 
-var enemy_properties = {
-    object : enemies,
-    health: 400,
-    is_green: false,
-    is_red: false,
-    flicker_count: 0,
-    flicker_stop: 2,
-    green_count: 0,
-    red_count: 0,
-    form: 'base_form_shooting'
-}
+// var enemy_properties = {
+//     object : enemies,
+//     health: 400,
+//     is_green: false,
+//     is_red: false,
+//     flicker_count: 0,
+//     flicker_stop: 2,
+//     green_count: 0,
+//     red_count: 0,
+//     form: 'base_form_shooting'
+// }
+
+
 
 
 function preload ()
@@ -86,8 +89,7 @@ function preload ()
     this.load.spritesheet('jet', 'sprites/jet.png', { frameWidth: 70, frameHeight: 49 });
     
     this.load.spritesheet('explosion', 'sprites/explosion.png', { frameWidth: 32, frameHeight: 32 });
-    this.load.spritesheet('bullet', 'sprites/bullet.png', { frameWidth: 32, frameHeight: 32 });
-    // this.load.spritesheet("bullet", "")
+    this.load.spritesheet('bullet', 'sprites/bullets/jet_bullets.png', { frameWidth: 32, frameHeight: 32 });
     // this.load.spritesheet('powerups', 'sprites/powerups.png', { frameWidth: 32, frameHeight: 38 });
 
     this.load.image('health', 'sprites/powerups/health.png');
@@ -124,36 +126,36 @@ function create ()
     // explosion = this.physics.add.sprite(100, 450, "explosion")
     // explosion.setCollideWorldBounds(true);
 
-    health_powerup = this.physics.add.sprite(500, 300, 'health');
+    healthPowerup = this.physics.add.sprite(500, 300, 'health');
     // player.setBounce(0.2);
     player.setCollideWorldBounds(true);
     // player.body.setGravityY(10);
-    health_powerup.body.setVelocityY(80);
+    healthPowerup.body.setVelocityY(80);
 
     this.anims.create({
         key: "boom",
         frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 3 }),
-        frameRate: frame_rate,
+        frameRate: frameRate,
         repeat: 0
     });
 
     this.anims.create({
             key: "base_form_shooting",
             frames: this.anims.generateFrameNumbers('jet', { start: 0, end: 1 }),
-            frameRate: frame_rate,
+            frameRate: frameRate,
             repeat: -1
     });
 
     this.anims.create({
         key: "base_form",
         frames: this.anims.generateFrameNumbers('jet', { start: 0, end: 0 }),
-        frameRate: frame_rate,
+        frameRate: frameRate,
         repeat: -1
     });
     this.anims.create({
         key: "form1",
         frames: this.anims.generateFrameNumbers('jet', { start: 2, end: 2 }),
-        frameRate: frame_rate,
+        frameRate: frameRate,
         repeat: -1
     });
 
@@ -161,14 +163,14 @@ function create ()
     this.anims.create({
         key: "form1_shooting",
         frames: this.anims.generateFrameNumbers('jet', { start: 2, end: 3 }),
-        frameRate: frame_rate,
+        frameRate: frameRate,
         repeat: -1
     });
 
     this.anims.create({
         key: "form2_shooting",
         frames: this.anims.generateFrameNumbers('jet', { start: 4, end: 5 }),
-        frameRate: frame_rate,
+        frameRate: frameRate,
         repeat: -1
     });
 
@@ -176,14 +178,14 @@ function create ()
     this.anims.create({
         key: "form3",
         frames: this.anims.generateFrameNumbers('jet', { start: 6, end: 6 }),
-        frameRate: frame_rate,
+        frameRate: frameRate,
         repeat: -1
     });
 
     this.anims.create({
         key: "form3_shooting",
         frames: this.anims.generateFrameNumbers('jet', { start: 6, end: 7 }),
-        frameRate: frame_rate,
+        frameRate: frameRate,
         repeat: -1
     });
 
@@ -279,7 +281,7 @@ function update ()
     if (paused == false){
 
         if (count % 50 == 0){
-            player.anims.play(player_properties.form, true);
+            player.anims.play(playerProperties.form, true);
             // jump = Phaser.Math.Between(0, 300) * -1;
             jump = jump * -1;
             enemy.x = enemy.x  + jump;
@@ -287,20 +289,20 @@ function update ()
         }
     
         if (cursors.up.isDown){
-            player_properties.form = "base_form_shooting";
+            playerProperties.form = "base_form_shooting";
         }
         else if (cursors.down.isDown){
-            player_properties.form = "form1_shooting";
+            playerProperties.form = "form1_shooting";
         }
         else if (cursors.left.isDown)
         {
             player.setVelocityX(-200);
-            player_properties.form = "form2_shooting";
+            playerProperties.form = "form2_shooting";
         }
         else if (cursors.right.isDown)
         {
             player.setVelocityX(200);
-            player_properties.form = "form3_shooting";
+            playerProperties.form = "form3_shooting";
         }
         else{
             player.setVelocityX(0);
@@ -310,13 +312,13 @@ function update ()
     
         checkBullets();
     
-        if ((( player.x - 20 <= health_powerup.x) && (player.x + 20 >= health_powerup.x)) && 
-        (( health_powerup.y >=  player.y - 20 ) && (health_powerup.y <  player.y + 20))){
-            contact_health = true;
+        if ((( player.x - 20 <= healthPowerup.x) && (player.x + 20 >= healthPowerup.x)) && 
+        (( healthPowerup.y >=  player.y - 20 ) && (healthPowerup.y <  player.y + 20))){
+            contactHealth = true;
     
         }
     
-        check_powerups();
+        checkPowerups();
     
         // if (count > 149){
         //     createEnemy();
@@ -331,7 +333,7 @@ function update ()
         // {
         //     player.setVelocityY(-330);
         // }
-        check_explosion();
+        checkExplosion();
 
     }
     
@@ -362,16 +364,16 @@ function bulletsToFire(stageCheck){
 }
 
 function shoot(){
-    if (player_properties.form == "base_form_shooting"){
+    if (playerProperties.form == "base_form_shooting"){
         bulletsToFire([true,false,false,false]);
     }
-    if (player_properties.form == "form1_shooting"){
+    if (playerProperties.form == "form1_shooting"){
         bulletsToFire([true,true,false,false]);
     }
-    if (player_properties.form == "form2_shooting"){
+    if (playerProperties.form == "form2_shooting"){
         bulletsToFire([true,true,true,false]);
     }
-    if (player_properties.form == "form3_shooting"){
+    if (playerProperties.form == "form3_shooting"){
         bulletsToFire([true,true,true,true]);
     }
 
@@ -465,7 +467,7 @@ function createEnemy(){
     // });
 }
 
-function check_explosion(){
+function checkExplosion(){
     explosions.children.iterate(function (child){
         if (child){
             child.on(Phaser.Animations.Events.ANIMATION_COMPLETE, function (anim, frame, gameObject) {
@@ -477,31 +479,31 @@ function check_explosion(){
     });
 }
 
-function check_powerups(){
+function checkPowerups(){
     
     // player_properties.flicker_count
-    if (contact_health){
+    if (contactHealth){
 
-        health_powerup.setX(1000);
-        health_powerup.destroy(true); 
+        healthPowerup.setX(1000);
+        healthPowerup.destroy(true); 
 
         // make health stop only when flicker complete
-        if (player_properties.flicker_count > player_properties.flicker_stop){
-            contact_health = false;
+        if (playerProperties.flickerCount > playerProperties.flickerStop){
+            contactHealth = false;
         }
         else{
 
-            if(player_properties.green_count < 50){
+            if(playerProperties.greenCount < 50){
                 player.setTint(0x00ff00);
-                player_properties.green_count++;
+                playerProperties.greenCount++;
             }
-            else if((player_properties.green_count >= 50) && (player_properties.green_count <= 100)){
+            else if((playerProperties.greenCount >= 50) && (playerProperties.greenCount <= 100)){
                 player.clearTint();
-                player_properties.green_count++;
+                playerProperties.greenCount++;
             }
             else{
-                player_properties.green_count = 0;
-                player_properties.flicker_count++;
+                playerProperties.greenCount = 0;
+                playerProperties.flickerCount++;
                 player.clearTint();
             }
         }  
