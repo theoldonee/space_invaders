@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="">Tutorials</a></li>
+                <li><a href="">Highscores</a></li>
+                <li class="dropdown">
+                    <button class="nav_button">Register/Login</button>
+                    <div class="dropdown_content">
+                        <a onclick="redirect('register')">Register</a>
+                        <a onclick="redirect('login')">Logout</a>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <section>
+        <div class="section_div">
+            <h2>SPACE INVADERS</h2>
+            <h3 style="color: red; display: none;">Your account already exist, please login</h3>
+            <div class="form_div">
+                
+                <div class="form">
+                    <p>REGISTER</p>
+                    <div class="input_div">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" placeholder="Name" id="name">
+                    </div>
+                    <div class="input_div">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" placeholder="Email" id="email">
+                    </div>
+                    <div class="input_div">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="text" placeholder="Password" id="password">
+                    </div>
+
+                    <div class="input_div">
+                        <i class="fa-solid fa-calendar-days"></i>
+                        <input type="date" placeholder="Date Of Birth" id="DOB">
+                    </div>
+                    
+                    
+                    <div class="input_div">
+                        <i class="fa-solid fa-venus-mars"></i>
+                        <div id="gender_div">
+                            <button onclick="toggle('male')" id="male">Male</button>
+                            <button onclick="toggle('female')" id="female">Female</button>
+                            <button onclick="toggle('other')" id="other">Other</button>
+                        </div>
+                        
+                    </div>
+                    
+                    <button onclick="checkValues()" id="register_button">Register</button>
+
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer>
+        <div>
+            <span>Date: 20/09/2024</span>
+            <span>Made by: Favour Esset</span>
+            <span>Finished: Nil</span>
+        </div>
+    </footer>
+</body>
+<script src="js/home.js"></script>
+</html>
+
+

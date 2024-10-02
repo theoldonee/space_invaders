@@ -1,0 +1,72 @@
+
+section{
+    display: flex;
+    background-color: black;
+    height: 850px;
+}
+
+
+div > img{
+    display: inline-flex;
+    width: 250px;
+    height: 250px;
+    /* border: 1px solid white; */
+    float: left;
+    margin-top: 30px;
+}
+
+section > div{
+    /* border: 1px solid white; */
+    width: 50%;
+}
+
+p{
+    font-size: 23px;
+    text-align: justify;
+    text-justify: inter-word;
+
+}
+
+h1, span, p{
+    color: white;
+}
+
+h1{
+    text-align: center;
+    margin: 10px 0px;
+}
+
+.section_div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#highcore_data{
+    width: 600px;
+    height: 600px;
+    border: 1px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#highcore_data div{
+    display: flex;
+    flex-direction: column;
+}
+
+#highcore_data div button{
+    background-color: brown;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+}
+
+
+/* .highscore_div{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+} */

@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;1,300&display=swap'); /* Google Fonts link for Montserrat font */
+html{
+    font-family: 'Montserrat', 'Arial';
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    /* border: solid black 1px; */
+}
+
+
+button:hover{
+    cursor: pointer;
+}
+
+
+canvas {   
+    display : block;   
+    margin : auto;
+}
+
+h2{
+    color: aliceblue;
+}
+
+body {
+    height: 720px;
+}
+
+/* Start Ws schools */
+.nav_button {
+    background-color: brown;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown_content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown_content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown_content a:hover {background-color: #ddd;}
+.dropdown:hover .dropdown_content {display: block;}
+.dropdown:hover .dropbtn {background-color: brown;}
+
+/* End Ws schools */
+
+nav{
+    
+    border: solid black 1px;
+}
+
+nav ul{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    height: 50px;
+    
+}
+
+nav ul li {
+    font-weight: bolder;
+    list-style: none;
+}
+
+nav ul li select {
+    width: 110px;
+}
+
+nav ul li a{
+    text-decoration: none;
+}
+
+
+footer{
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+footer div{
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 50px;
+    color: white;
+    background-color: brown;
+}
+
