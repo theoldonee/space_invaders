@@ -1,73 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Home</title>
-    <link rel="stylesheet" href="css/template.css">
-    <link rel="stylesheet" href="css/home.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-
-</head>
-<body>
+    <link rel="stylesheet" href="css/template.css" />
+    <link rel="stylesheet" href="css/home.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+  </head>
+  <body>
     <header>
-        <nav>
-            <ul>
-                <li><a href="home.html">Home</a></li>
-                <li><a href="">Tutorials</a></li>
-                <li><a href="">Highscores</a></li>
-                <li class="dropdown">
-                    <button class="nav_button">Register/Login</button>
-                    <div class="dropdown_content">
-                        <a onclick="redirect('register',false)">Register</a>
-                        <a onclick="redirect('login',false)">Login</a>
-                    </div>
-                </li>
-            </ul>
-        </nav>
+      <nav>
+        <ul>
+          <li><a href="home.html">Home</a></li>
+          <li><a href="">Tutorials</a></li>
+          <li><a href="">Highscores</a></li>
+          <li class="dropdown">
+            <button class="nav_button">Register/Login</button>
+            <div class="dropdown_content">
+              <a onclick="redirect('register',false)">Register</a>
+              <a onclick="redirect('login',false)">Login</a>
+            </div>
+          </li>
+        </ul>
+      </nav>
     </header>
     <section>
+      <div>
+        <h1>THE STORY</h1>
         <div>
-            <h1>THE STORY</h1>
-            <div>
-                <img src="sprites/jet_stage2.png" alt="Jet image">
-                <!-- <span>hi</span> -->
-                <p>
-                    Starborn Rebellion
-                    Captain Kira Valen's starfighter, The Seraphim, streaked through the dark void of space. The Zhyrak, a ruthless alien race, had invaded the galaxy, their fleets consuming entire systems. 
-                    Kira, a pilot of the United Starfleet, had lost her home planet to them. Now, she led a final assault against the Zhyrak's massive warship, The Eclipse.
-                    "All units, this is it," Kira said over comms. Her squadron, the Starborn, prepared for the strike. As they neared The Eclipse, swarms of alien fighters emerged, their ships writhing like living creatures. 
-                    Laser fire blazed across the stars. Kira expertly dodged incoming fire, pushing forward. Her heart pounded with the weight of the mission.
-                    As the Starborn closed in, The Eclipse unleashed its weapon: a devastating beam of energy that destroyed half their fleet in an instant. But Kira pressed on. "Stay focused!" she called out.
-                    They reached The Eclipse, docking in a swarm of debris and wreckage. Inside, the ship felt alive, its walls pulsing with energy. 
-                    Kira's team fought through Zhyrak soldiers as they made their way to the ship's core, a massive, glowing heart that drained energy from the nearby star.
-                    "Set the charges," Kira ordered as her team planted explosives. But before they could finish, the Zhyrak queen emerged, a towering figure of armor and glowing eyes. 
-                    "You will not stop the Zhyrak," it hissed.
-                    Kira didn't hesitate. She charged, plasma sword in hand, engaging the queen in a fierce duel. Despite the alien's size, Kira's strikes were swift. She saw an opening and thrust her blade into the queen's core. 
-                    The creature screeched, collapsing into darkness.
-                    With seconds to spare, Kira and her team escaped. As The Seraphim sped away, the charges detonated, destroying The Eclipse in a brilliant explosion.
-                    The galaxy wasn't safe yet, but for now, Kira had won. The Zhyrak's greatest weapon was gone, and the fight for freedom continued.
-                </p>
-            </div>
-            
+          <img src="sprites/jet_stage2.png" alt="Jet image" />
+          <!-- <span>hi</span> -->
+          <p>
+            Starborn Rebellion Captain Kira Valen's starfighter, The Seraphim,
+            streaked through the dark void of space. The Zhyrak, a ruthless
+            alien race, had invaded the galaxy, their fleets consuming entire
+            systems. Kira, a pilot of the United Starfleet, had lost her home
+            planet to them. Now, she led a final assault against the Zhyrak's
+            massive warship, The Eclipse. "All units, this is it," Kira said
+            over comms. Her squadron, the Starborn, prepared for the strike. As
+            they neared The Eclipse, swarms of alien fighters emerged, their
+            ships writhing like living creatures. Laser fire blazed across the
+            stars. Kira expertly dodged incoming fire, pushing forward. Her
+            heart pounded with the weight of the mission. As the Starborn closed
+            in, The Eclipse unleashed its weapon: a devastating beam of energy
+            that destroyed half their fleet in an instant. But Kira pressed on.
+            "Stay focused!" she called out. They reached The Eclipse, docking in
+            a swarm of debris and wreckage. Inside, the ship felt alive, its
+            walls pulsing with energy. Kira's team fought through Zhyrak
+            soldiers as they made their way to the ship's core, a massive,
+            glowing heart that drained energy from the nearby star. "Set the
+            charges," Kira ordered as her team planted explosives. But before
+            they could finish, the Zhyrak queen emerged, a towering figure of
+            armor and glowing eyes. "You will not stop the Zhyrak," it hissed.
+            Kira didn't hesitate. She charged, plasma sword in hand, engaging
+            the queen in a fierce duel. Despite the alien's size, Kira's strikes
+            were swift. She saw an opening and thrust her blade into the queen's
+            core. The creature screeched, collapsing into darkness. With seconds
+            to spare, Kira and her team escaped. As The Seraphim sped away, the
+            charges detonated, destroying The Eclipse in a brilliant explosion.
+            The galaxy wasn't safe yet, but for now, Kira had won. The Zhyrak's
+            greatest weapon was gone, and the fight for freedom continued.
+          </p>
         </div>
-        <div class="section_div">
-            <div class="highscore_div">
-                <h1>HIGHSCORES</h1>
-                <div id="highcore_data">
-            
-                </div>
-            </div>
+      </div>
+      <div class="section_div">
+        <div class="highscore_div">
+          <h1>HIGHSCORES</h1>
+          <div id="highcore_data"></div>
         </div>
+      </div>
     </section>
     <footer>
-        <div>
-            <span>Date: 20/09/2024</span>
-            <span>Made by: Favour Esset</span>
-            <span>Finished: Nil</span>
-        </div>
+      <div>
+        <span>Date: 20/09/2024</span>
+        <span>Made by: Favour Esset</span>
+        <span>Finished: Nil</span>
+      </div>
     </footer>
-</body>
-<script src="js/home.js"></script>
+  </body>
+  <script src="js/home.js"></script>
 </html>
-

@@ -81,8 +81,10 @@ var playerProperties = {
 
 class Enemy{
     static children = [];
-    constructor(enemyObject){
-        this.enemy = enemyObject;
+    static bullet = [];
+    static physics;
+    constructor(){
+        this.enemy = Enemy.physics.add.sprite(400, 100,"enemy_type_1").setScale(1.5);
         this.health = 400;
         this.isGreen = false;
         this.isRed = false;
@@ -91,6 +93,12 @@ class Enemy{
         this.greenCount = 0;
         this.redCount = 0;
         this.form = 'normal';
+        Enemy.addEnemy(this);
+        // alert(this)
+    }
+
+    static setPhysics(classClass){
+        this.physics = classClass;
     }
 
     static addEnemy(enemyObject) {
@@ -98,10 +106,20 @@ class Enemy{
     }
 
 
+    // static createEnemy(){
+    //     var enemyObject = this.physics.add.sprite(400, 100,"enemy_type_1").setScale(1.5);
+    //     // alert(this);
+    //     this.addEnemy(enemyObject);
+    //     return enemyObject;
+    // }
+
     static removeEnemy(enemyObject) {
         this.children.pop(enemyObject);
     }
     
+    shoot() {
+        Enemy.physics.add.sprite(400, 200,"enemy_bullet").setScale(0.5);
+    }
 
 }
 
@@ -114,17 +132,19 @@ function preload ()
     
     this.load.spritesheet('explosion', 'sprites/explosion.png', { frameWidth: 32, frameHeight: 32 });
     this.load.spritesheet('bullet', 'sprites/bullets/jet_bullets.png', { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('enemy_bullet', 'sprites/bullets/enemy_bullet.png', { frameWidth: 30, frameHeight: 30 });
     // this.load.spritesheet('powerups', 'sprites/powerups.png', { frameWidth: 32, frameHeight: 38 });
 
     this.load.image('health', 'sprites/powerups/health.png');
 
-
+    // this.load.
     this.load.spritesheet('enemy_type_1', 'sprites/enemies/enemy_type_1.png', { frameWidth: 23, frameHeight: 19 });
 
 }
 
 function create ()
 {
+    Enemy.setPhysics(this.physics);
     // this.add.image(450, 450, 'sky');
     
     // platforms = this.physics.add.staticGroup();
@@ -140,8 +160,14 @@ function create ()
     player = this.physics.add.sprite(500, 700, "jet").setScale(1.5);
 
     enemy = this.physics.add.sprite(800, 200, "enemy_type_1").setScale(1.5);
+    
+    enemy_bullet = this.physics.add.sprite(800, 100,"enemy_bullet").setScale(0.5);
 
-    // enemies = this.physics.add.staticGroup();
+    var enemy_2 = new Enemy();
+    // alert(enemy_2.health);
+
+    // enemy_2.shoot();
+
 
     // platforms.create(400, 568, "ground").setScale(1).refreshBody();
 
@@ -221,35 +247,6 @@ function create ()
     // bullets.setVelocityY(-300);
     explosions = this.physics.add.group();
 
-    
-
-    
-
-    // enemies = this.physics.add.group();
-    // powerups = this.physics.add.group();
-
-    // this.anims.create({
-    //     key: "left",
-    //     frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
-    //     frameRate: 10,
-    //     repeat: -1
-    // });
-
-    // this.anims.create({
-    // key: 'turn',
-    // frames: [ { key: 'dude', frame: 4 } ],
-    // frameRate: 20
-    // });
-
-    // this.anims.create({
-    //     key: 'right',
-    //     frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8 }),
-    //     frameRate: 10,
-    //     repeat: -1
-    // });
-
-    // this.physics.add.collider(player, platforms);
-    // this.physics.add.collider(powerup, bullets);
 
     cursors = this.input.keyboard.createCursorKeys();
     keyboard = this.input.keyboard.addKeys("Q, P");
@@ -433,16 +430,6 @@ function shoot(){
 //     }
 // }
 
-// function hitBomb (player, bomb)
-// {
-//     this.physics.pause();
-
-//     player.setTint(0xff0000);
-
-//     player.anims.play('turn');
-
-//     gameOver = true;
-// }
 function hitLife (player)
 {
     player.setTint(0x00ff00);
@@ -452,16 +439,14 @@ function hitLife (player)
 }
 
 function checkBullets(){
+
+
     bullets.children.iterate(function (child) {
         if (child){
             if (child.y < 0){
                 // child.disableBody(true, true);   
                 child.destroy();             
             }
-            // (((child.x >= enemy.x - 2) || (child.x <= enemy.x + 2)) && child.y == enemy.y)
-            // alert(enemy.x)
-            // alert(enemy.x - 2)
-            // alert(enemy.x)
 
             if ((((enemy.x + 25) >= child.x) && ((enemy.x - 25) <= child.x)) && (child.y == enemy.y)){
                 child.destroy();
@@ -471,6 +456,20 @@ function checkBullets(){
                 enemy.disableBody(true, true); 
 
             }
+
+            for (i= 0; i < Enemy.children.length;  i++){
+                enemy_child = Enemy.children[i];
+                var enemyObject = enemy_child.enemy
+                if ((((enemyObject.x + 25) >= child.x) && ((enemyObject.x - 25) <= child.x)) && (child.y == enemyObject.y)){
+                    child.destroy();
+                    explosion = explosions.create(enemyObject.x, enemyObject.y, "explosion");
+                    explosion.anims.play("boom", true);
+                    enemyObject.destroy();
+                    Enemy.removeEnemy(enemy_child);
+    
+                }
+            }
+            
             // child.enableBody(true, child.x, 0, true, true);
         }
 
