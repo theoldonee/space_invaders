@@ -63,8 +63,10 @@ var playerProperties = {
 class Enemy{
     static children = [];
     static bullet = [];
+    static bulletVelX = [];
     static physics;
     static tweens;
+
     constructor(){
         this.type = "enemy_type_1"
         this.health;
@@ -108,13 +110,26 @@ class Enemy{
         }
     }
     
-    static checkBullets(){
+    static checkBullets(y){
         this.bullet.forEach( (bullet) => {
-            if (bullet.y > 810){
-                // child.disableBody(true, true);   
-                child.destroy();             
+            var index;
+            index = this.bullet.indexOf(bullet);
+            if (bullet.y > 800){   
+
+                bullet.destroy();  
+                this.bullet.splice(index, 1);           
             }
+            
         }); 
+    }
+
+    static setBulletVelocity(playerX, playerY, bullet_object){
+        var seconds = 9;
+        var velX = (playerX - bullet_object.x)/seconds;
+        var velY = (playerY - bullet_object.y)/seconds;
+
+        bullet_object.setVelocityX(velX);
+        bullet_object.setVelocityY(velY);
     }
     
     shoot(x, y) {
@@ -122,17 +137,9 @@ class Enemy{
         if (this.form == "normal") {
             enemyBullet = Enemy.physics.add.sprite(this.object.x + 4, this.object.y + 10,"enemy_bullet").setScale(0.5);
             Enemy.bullet.push(enemyBullet);
-            // enemyBullet.setVelocityY(200);
-            
         }
 
-        Enemy.tweens.add({
-            targets: enemyBullet,
-            x: x,
-            y: y,
-            duration: 8800,
-            ease: 'Linear'
-        });
+        Enemy.setBulletVelocity(x, y, enemyBullet);
     }
 
 }
@@ -142,7 +149,7 @@ function preload ()
 {
     this.load.image('sky', 'assets/sky.png');
 
-    this.load.spritesheet('jet', 'sprites/jet.png', { frameWidth: 70, frameHeight: 49 });
+    this.load.spritesheet('jet', 'sprites/jet.png', { frameWidth: 70, frameHeight: 46 });
     
     this.load.spritesheet('explosion', 'sprites/explosion.png', { frameWidth: 32, frameHeight: 32 });
     this.load.spritesheet('bullet', 'sprites/bullets/jet_bullets.png', { frameWidth: 32, frameHeight: 32 });
@@ -294,7 +301,7 @@ function update ()
             // shoot();
         }
 
-        if (count % 75 == 0){
+        if (count % 150 == 0){
             jump = jump * -1;
             enemy_2.object.x = enemy_2.object.x  + jump;
             enemy_2.shoot(player.x, player.y);
@@ -324,6 +331,7 @@ function update ()
     
     
         checkBullets();
+        Enemy.checkBullets(player.y);
     
         if ((( player.x - 20 <= healthPowerup.x) && (player.x + 20 >= healthPowerup.x)) && 
         (( healthPowerup.y >=  player.y - 20 ) && (healthPowerup.y <  player.y + 20))){
