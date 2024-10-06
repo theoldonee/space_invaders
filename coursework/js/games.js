@@ -26,16 +26,8 @@ function redirect(display_content){
 var game;
 window.onload = function (){
     const email = window.location.search.split("?")[1];
-    // alert(email);
-    // console.log(queryString);
-    // var email = "emaail";
     if (!email){
         alert("You must login to play");
-
-        // var name = 'fool'
-
-        // document.getElementById("dummy_div").innerHTML = `<h3>${}</h3>`;
-
     }
     else{
        game  = new Phaser.Game(config);
@@ -53,6 +45,7 @@ var paused = false;
 var contactHealth = false;
 var player;
 var enemy;
+var enemy_2;
 var healthPowerup;
 
 var playerProperties = {
@@ -67,25 +60,15 @@ var playerProperties = {
     form: 'base_form_shooting'
 }
 
-// var enemy_properties = {
-//     object : enemies,
-//     health: 400,
-//     is_green: false,
-//     is_red: false,
-//     flicker_count: 0,
-//     flicker_stop: 2,
-//     green_count: 0,
-//     red_count: 0,
-//     form: 'base_form_shooting'
-// }
-
 class Enemy{
     static children = [];
     static bullet = [];
     static physics;
+    static tweens;
     constructor(){
-        this.enemy = Enemy.physics.add.sprite(400, 100,"enemy_type_1").setScale(1.5);
-        this.health = 400;
+        this.type = "enemy_type_1"
+        this.health;
+        this.object = Enemy.physics.add.sprite(400, 100,this.type).setScale(1.5);
         this.isGreen = false;
         this.isRed = false;
         this.flickerCount = 0;
@@ -93,32 +76,63 @@ class Enemy{
         this.greenCount = 0;
         this.redCount = 0;
         this.form = 'normal';
+        Enemy.checkType(this);
         Enemy.addEnemy(this);
-        // alert(this)
     }
 
     static setPhysics(classClass){
         this.physics = classClass;
     }
 
+    static setTweens(classClass){
+        this.tweens = classClass;
+    }
+
     static addEnemy(enemyObject) {
         this.children.push(enemyObject);
     }
 
-
-    // static createEnemy(){
-    //     var enemyObject = this.physics.add.sprite(400, 100,"enemy_type_1").setScale(1.5);
-    //     // alert(this);
-    //     this.addEnemy(enemyObject);
-    //     return enemyObject;
-    // }
-
     static removeEnemy(enemyObject) {
         this.children.pop(enemyObject);
     }
+
+    static checkType(enemyObject){
+        if (enemyObject.type == "enemy_type_1"){
+            enemyObject.health = 50;
+        }
+        if (enemyObject.type == "enemy_type_2"){
+            enemyObject.health = 100;
+        }
+        if (enemyObject.type == "enemy_type_3"){
+            enemyObject.health = 150;
+        }
+    }
     
-    shoot() {
-        Enemy.physics.add.sprite(400, 200,"enemy_bullet").setScale(0.5);
+    static checkBullets(){
+        this.bullet.forEach( (bullet) => {
+            if (bullet.y > 810){
+                // child.disableBody(true, true);   
+                child.destroy();             
+            }
+        }); 
+    }
+    
+    shoot(x, y) {
+        var enemyBullet;
+        if (this.form == "normal") {
+            enemyBullet = Enemy.physics.add.sprite(this.object.x + 4, this.object.y + 10,"enemy_bullet").setScale(0.5);
+            Enemy.bullet.push(enemyBullet);
+            // enemyBullet.setVelocityY(200);
+            
+        }
+
+        Enemy.tweens.add({
+            targets: enemyBullet,
+            x: x,
+            y: y,
+            duration: 8800,
+            ease: 'Linear'
+        });
     }
 
 }
@@ -133,11 +147,10 @@ function preload ()
     this.load.spritesheet('explosion', 'sprites/explosion.png', { frameWidth: 32, frameHeight: 32 });
     this.load.spritesheet('bullet', 'sprites/bullets/jet_bullets.png', { frameWidth: 32, frameHeight: 32 });
     this.load.spritesheet('enemy_bullet', 'sprites/bullets/enemy_bullet.png', { frameWidth: 30, frameHeight: 30 });
-    // this.load.spritesheet('powerups', 'sprites/powerups.png', { frameWidth: 32, frameHeight: 38 });
 
     this.load.image('health', 'sprites/powerups/health.png');
 
-    // this.load.
+
     this.load.spritesheet('enemy_type_1', 'sprites/enemies/enemy_type_1.png', { frameWidth: 23, frameHeight: 19 });
 
 }
@@ -145,41 +158,18 @@ function preload ()
 function create ()
 {
     Enemy.setPhysics(this.physics);
-    // this.add.image(450, 450, 'sky');
+    Enemy.setTweens(this.tweens);
     
-    // platforms = this.physics.add.staticGroup();
-
-    // platforms.create(400, 568, "ground").setScale(1).refreshBody();
-    // platforms.create(600, 400, 'ground');
-    // platforms.create(50, 250, 'ground');
-    // platforms.create(750, 220, 'ground');
-
-    // game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-    
-
     player = this.physics.add.sprite(500, 700, "jet").setScale(1.5);
 
-    enemy = this.physics.add.sprite(800, 200, "enemy_type_1").setScale(1.5);
+    // enemy = this.physics.add.sprite(800, 200, "enemy_type_1").setScale(1.5);
     
-    enemy_bullet = this.physics.add.sprite(800, 100,"enemy_bullet").setScale(0.5);
+    // enemy_bullet = this.physics.add.sprite(800, 100,"enemy_bullet").setScale(0.5);
 
-    var enemy_2 = new Enemy();
-    // alert(enemy_2.health);
-
-    // enemy_2.shoot();
-
-
-    // platforms.create(400, 568, "ground").setScale(1).refreshBody();
-
-    // bullet = this.physics.add.sprite(500, 500, "bullet").setScale(0.5);
-
-    // explosion = this.physics.add.sprite(100, 450, "explosion")
-    // explosion.setCollideWorldBounds(true);
+    enemy_2 = new Enemy();
 
     healthPowerup = this.physics.add.sprite(500, 300, 'health');
-    // player.setBounce(0.2);
     player.setCollideWorldBounds(true);
-    // player.body.setGravityY(10);
     healthPowerup.body.setVelocityY(80);
 
     this.anims.create({
@@ -281,16 +271,10 @@ function create ()
 
 function update ()
 {
-    // game.scale.pageAlignHorizontally = true;
-    // game.scale.pageAlignVertically = true;
-    // game.scale.refresh();
-    // alert(Phaser.Game.getTime());
-    // if ()
-
-
     if (keyboard.Q.isDown && paused == false){
         this.physics.pause();
         this.anims.pauseAll();
+        this.tweens.pauseAll();
         paused = true;
     }
     else if (keyboard.P.isDown && paused == true){
@@ -304,8 +288,16 @@ function update ()
         if (count % 50 == 0){
             player.anims.play(playerProperties.form, true);
             // jump = Phaser.Math.Between(0, 300) * -1;
+            // jump = jump * -1;
+            // enemy_2.object.x = enemy_2.object.x  + jump;
+            // enemy_2.shoot(player.x, player.y);
+            // shoot();
+        }
+
+        if (count % 75 == 0){
             jump = jump * -1;
-            enemy.x = enemy.x  + jump;
+            enemy_2.object.x = enemy_2.object.x  + jump;
+            enemy_2.shoot(player.x, player.y);
             shoot();
         }
     
@@ -341,19 +333,9 @@ function update ()
     
         checkPowerups();
     
-        // if (count > 149){
-        //     createEnemy();
-        // }
-    
         if (count == 1000){
             count = 0;
         }
-        // 0 - 49 green, 50, 100 normal, 101 - 150 green
-    
-        // if (cursors.up.isDown && player.body.touching.down)
-        // {
-        //     player.setVelocityY(-330);
-        // }
         checkExplosion();
 
     }
@@ -423,24 +405,21 @@ function shoot(){
 //         var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
 
 //         var bomb = bombs.create(x, 16, 'bomb');
-//         bomb.setBounce(1);
-//         bomb.setCollideWorldBounds(true);
 //         bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
 
 //     }
 // }
 
-function hitLife (player)
-{
-    player.setTint(0x00ff00);
-    player.clearTint();
-    player.setTint(0x00ff00);
-    player.clearTint();
-}
+// function hitLife (player)
+// {
+//     player.setTint(0x00ff00);
+//     player.clearTint();
+//     player.setTint(0x00ff00);
+//     player.clearTint();
+// }
+
 
 function checkBullets(){
-
-
     bullets.children.iterate(function (child) {
         if (child){
             if (child.y < 0){
@@ -448,18 +427,8 @@ function checkBullets(){
                 child.destroy();             
             }
 
-            if ((((enemy.x + 25) >= child.x) && ((enemy.x - 25) <= child.x)) && (child.y == enemy.y)){
-                child.destroy();
-                explosion = explosions.create(enemy.x, enemy.y, "explosion");
-                explosion.anims.play("boom", true);
-                enemy.setX(2000);
-                enemy.disableBody(true, true); 
-
-            }
-
-            for (i= 0; i < Enemy.children.length;  i++){
-                enemy_child = Enemy.children[i];
-                var enemyObject = enemy_child.enemy
+            Enemy.children.forEach((enemy_child) => {
+                var enemyObject = enemy_child.object
                 if ((((enemyObject.x + 25) >= child.x) && ((enemyObject.x - 25) <= child.x)) && (child.y == enemyObject.y)){
                     child.destroy();
                     explosion = explosions.create(enemyObject.x, enemyObject.y, "explosion");
@@ -468,26 +437,10 @@ function checkBullets(){
                     Enemy.removeEnemy(enemy_child);
     
                 }
-            }
-            
-            // child.enableBody(true, child.x, 0, true, true);
+            });
         }
-
         
     });
-}
-
-function createEnemy(){
-    enemy = enemies.create(player.x, player.y - 200, "enemy_type_1");
-    // bullet.setVelocityY(-300);
-
-    // bullets.children.iterate(function (child) {
-
-    //     if (child.y < 200){
-    //         child.disableBody(true, true);                
-    //     }
-    //     // child.enableBody(true, child.x, 0, true, true);
-    // });
 }
 
 function checkExplosion(){
@@ -503,8 +456,6 @@ function checkExplosion(){
 }
 
 function checkPowerups(){
-    
-    // player_properties.flicker_count
     if (contactHealth){
 
         healthPowerup.setX(1000);
@@ -534,3 +485,5 @@ function checkPowerups(){
     }
 
 }
+
+// function flicker
