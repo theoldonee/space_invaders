@@ -18,6 +18,7 @@ div > img{
 section > div{
     /* border: 1px solid white; */
     width: 50%;
+    padding: 0 0 0 20px;
 }
 
 p{
