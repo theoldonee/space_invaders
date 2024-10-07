@@ -49,7 +49,7 @@ var enemy_2;
 var healthPowerup;
 
 var playerProperties = {
-    object : player,
+    // object: player,
     health: 400,
     isGreen: false,
     isRed: false,
@@ -57,7 +57,8 @@ var playerProperties = {
     flickerStop: 2,
     greenCount: 0,
     redCount: 0,
-    form: 'base_form_shooting'
+    form: 'base_form_shooting',
+    points: 0
 }
 
 class Enemy{
@@ -70,9 +71,10 @@ class Enemy{
     constructor(){
         this.type = "enemy_type_1"
         this.health;
-        this.object = Enemy.physics.add.sprite(400, 100,this.type).setScale(1.5);
+        this.object = Enemy.physics.add.sprite(400, 100,this.type).setScale(1.7);
         this.isGreen = false;
         this.isRed = false;
+        this.tint;
         this.flickerCount = 0;
         this.flickerStop = 2;
         this.greenCount = 0;
@@ -108,19 +110,6 @@ class Enemy{
         if (enemyObject.type == "enemy_type_3"){
             enemyObject.health = 150;
         }
-    }
-    
-    static checkBullets(y){
-        this.bullet.forEach( (bullet) => {
-            var index;
-            index = this.bullet.indexOf(bullet);
-            if (bullet.y > 800){   
-
-                bullet.destroy();  
-                this.bullet.splice(index, 1);           
-            }
-            
-        }); 
     }
 
     static setBulletVelocity(playerX, playerY, bullet_object){
@@ -158,7 +147,7 @@ function preload ()
     this.load.image('health', 'sprites/powerups/health.png');
 
 
-    this.load.spritesheet('enemy_type_1', 'sprites/enemies/enemy_type_1.png', { frameWidth: 23, frameHeight: 19 });
+    this.load.spritesheet('enemy_type_1', 'sprites/enemies/enemy_type_1.png', { frameWidth: 15, frameHeight: 19 });
 
 }
 
@@ -168,6 +157,7 @@ function create ()
     Enemy.setTweens(this.tweens);
     
     player = this.physics.add.sprite(500, 700, "jet").setScale(1.5);
+    playerProperties.object = player;
 
     // enemy = this.physics.add.sprite(800, 200, "enemy_type_1").setScale(1.5);
     
@@ -241,8 +231,12 @@ function create ()
     
 
     bullets = this.physics.add.group();
-    // bullets.setVelocityY(-300);
     explosions = this.physics.add.group();
+
+    score = this.add.text(50, 10, `Score: ${playerProperties.points}`, {
+        font: "25px Montserrat",
+        fill: "#ffffff",
+    });
 
 
     cursors = this.input.keyboard.createCursorKeys();
@@ -298,31 +292,33 @@ function update ()
             // jump = jump * -1;
             // enemy_2.object.x = enemy_2.object.x  + jump;
             // enemy_2.shoot(player.x, player.y);
-            // shoot();
+            shoot();
         }
 
         if (count % 150 == 0){
-            jump = jump * -1;
-            enemy_2.object.x = enemy_2.object.x  + jump;
-            enemy_2.shoot(player.x, player.y);
-            shoot();
+            // jump = jump * -1;
+            // enemy_2.object.x = enemy_2.object.x  + jump;
+            if (enemy_2.health != 0){
+                enemy_2.shoot(player.x, player.y);
+            }
+            
         }
     
         if (cursors.up.isDown){
             playerProperties.form = "base_form_shooting";
         }
-        else if (cursors.down.isDown){
-            playerProperties.form = "form1_shooting";
-        }
+        // else if (cursors.down.isDown){
+        //     // playerProperties.form = "form1_shooting";
+        // }
         else if (cursors.left.isDown)
         {
             player.setVelocityX(-200);
-            playerProperties.form = "form2_shooting";
+            // playerProperties.form = "form2_shooting";
         }
         else if (cursors.right.isDown)
         {
             player.setVelocityX(200);
-            playerProperties.form = "form3_shooting";
+            // playerProperties.form = "form3_shooting";
         }
         else{
             player.setVelocityX(0);
@@ -331,7 +327,7 @@ function update ()
     
     
         checkBullets();
-        Enemy.checkBullets(player.y);
+        // Enemy.checkBullets(player.y);
     
         if ((( player.x - 20 <= healthPowerup.x) && (player.x + 20 >= healthPowerup.x)) && 
         (( healthPowerup.y >=  player.y - 20 ) && (healthPowerup.y <  player.y + 20))){
@@ -341,7 +337,7 @@ function update ()
     
         checkPowerups();
     
-        if (count == 1000){
+        if (count == 1050){
             count = 0;
         }
         checkExplosion();
@@ -439,16 +435,42 @@ function checkBullets(){
                 var enemyObject = enemy_child.object
                 if ((((enemyObject.x + 25) >= child.x) && ((enemyObject.x - 25) <= child.x)) && (child.y == enemyObject.y)){
                     child.destroy();
-                    explosion = explosions.create(enemyObject.x, enemyObject.y, "explosion");
-                    explosion.anims.play("boom", true);
-                    enemyObject.destroy();
-                    Enemy.removeEnemy(enemy_child);
+                    if (enemy_child.health != 0){
+                        enemy_child.health = enemy_child.health - 25;
+                        enemy_child.tint = 0xff0000;
+                        enemyObject.setTint(enemy_child.tint);
+                        if (enemy_child.isRed){
+                            enemy_child.tint = enemy_child.tint - 600;
+                            enemyObject.setTint(enemy_child.tint);
+                        }
+                    }
+                    if (enemy_child.health == 0){
+                        playerProperties.points = playerProperties.points + 1;
+                        score.setText(`Score: ${playerProperties.points}`);
+                        explosion = explosions.create(enemyObject.x, enemyObject.y, "explosion");
+                        explosion.anims.play("boom", true);
+                        enemyObject.destroy();
+                        Enemy.removeEnemy(enemy_child);
+                    }
     
                 }
             });
         }
         
     });
+
+    
+    Enemy.bullet.forEach( (bullet) => {
+        var index;
+        // alert(this);
+        index = Enemy.bullet.indexOf(bullet);
+        if (bullet.y > 800){   
+            bullet.destroy();  
+            Enemy.bullet.splice(index, 1);           
+        }
+        
+    }); 
+
 }
 
 function checkExplosion(){
@@ -475,23 +497,70 @@ function checkPowerups(){
         }
         else{
 
-            if(playerProperties.greenCount < 50){
-                player.setTint(0x00ff00);
-                playerProperties.greenCount++;
-            }
-            else if((playerProperties.greenCount >= 50) && (playerProperties.greenCount <= 100)){
-                player.clearTint();
-                playerProperties.greenCount++;
-            }
-            else{
-                playerProperties.greenCount = 0;
-                playerProperties.flickerCount++;
-                player.clearTint();
-            }
+            flicker(playerProperties, 'green');
         }  
         
     }
 
 }
 
-// function flicker
+function flicker(objectToFlicker, flickerColor){
+
+    var color ;
+    // 0x00ff00
+    if (flickerColor == "green"){
+        color = 0x00ff00;
+        // alert(color);
+        if(objectToFlicker.greenCount < 50){
+            // alert(objectToFlicker);
+            objectToFlicker.object.setTint(color);
+            objectToFlicker.greenCount++;
+        }
+        else if((objectToFlicker.greenCount >= 50) && (playerProperties.greenCount <= 100)){
+            objectToFlicker.object.clearTint();
+            objectToFlicker.greenCount++;
+        }
+        else{
+            objectToFlicker.greenCount = 0;
+            objectToFlicker.flickerCount++;
+            objectToFlicker.object.clearTint();
+        }
+    }
+
+    // if (flickerColor == "red"){
+    //     color = 0xff0000;
+    //     if(objectToFlicker.redCount < 50){
+    //         objectToFlicker.object.setTint(color);
+    //         objectToFlicker.redCount++;
+    //     }
+    //     else{
+    //         objectToFlicker.redCount = 0;
+    //         objectToFlicker.object.clearTint();
+    //     }
+    // }
+
+    
+
+    // if (flickerColor == "green"){
+    //     // alert("Here");
+    //     redHex = 0xff0000;
+    //     greenHex = 0x00ff00;
+    //     // alert(objectToFlicker.greenCount);
+    //     if(objectToFlicker.greenCount < 50){
+    //         // player.setTint(0x00ff00);
+    //         player.setTint(0x00ff00);
+    //         objectToFlicker.greenCount++;
+    //     }
+    //     else if((objectToFlicker.greenCount >= 50) && (playerProperties.greenCount <= 100)){
+    //         player.clearTint();
+    //         objectToFlicker.greenCount++;
+    //     }
+    //     else{
+    //         objectToFlicker.greenCount = 0;
+    //         objectToFlicker.flickerCount++;
+    //         player.clearTint();
+    //     }
+    // }
+
+    
+}

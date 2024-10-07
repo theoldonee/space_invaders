@@ -17,10 +17,11 @@ var displayErrorMsg;
 
 // 
 window.onload = function (){
+
     params = window.location.search.split("?")[1];
     displayContent = params.split("$")[0];
     displayErrorMsg = params.split("$")[1];
-
+    // alert("hello");
     serveForm();
     // displays error message
     if (displayErrorMsg){
