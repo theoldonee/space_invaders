@@ -49,7 +49,6 @@ var enemy_2;
 var healthPowerup;
 
 var playerProperties = {
-    // object: player,
     health: 400,
     isGreen: false,
     isRed: false,
@@ -102,7 +101,7 @@ class Enemy{
 
     static checkType(enemyObject){
         if (enemyObject.type == "enemy_type_1"){
-            enemyObject.health = 50;
+            enemyObject.health = 200;
         }
         if (enemyObject.type == "enemy_type_2"){
             enemyObject.health = 100;
@@ -159,10 +158,6 @@ function create ()
     player = this.physics.add.sprite(500, 700, "jet").setScale(1.5);
     playerProperties.object = player;
 
-    // enemy = this.physics.add.sprite(800, 200, "enemy_type_1").setScale(1.5);
-    
-    // enemy_bullet = this.physics.add.sprite(800, 100,"enemy_bullet").setScale(0.5);
-
     enemy_2 = new Enemy();
 
     healthPowerup = this.physics.add.sprite(500, 300, 'health');
@@ -205,8 +200,23 @@ function create ()
     });
 
     this.anims.create({
+        key: "form1_bullets",
+        frames: this.anims.generateFrameNumbers('bullet', { start: 1, end: 1 }),
+        frameRate: frameRate,
+        repeat: -1
+    });
+
+
+    this.anims.create({
         key: "form2_shooting",
         frames: this.anims.generateFrameNumbers('jet', { start: 4, end: 5 }),
+        frameRate: frameRate,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: "form2_bullets",
+        frames: this.anims.generateFrameNumbers('bullet', { start: 2, end: 2 }),
         frameRate: frameRate,
         repeat: -1
     });
@@ -222,6 +232,13 @@ function create ()
     this.anims.create({
         key: "form3_shooting",
         frames: this.anims.generateFrameNumbers('jet', { start: 6, end: 7 }),
+        frameRate: frameRate,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: "form3_bullets",
+        frames: this.anims.generateFrameNumbers('bullet', { start: 3, end: 3 }),
         frameRate: frameRate,
         repeat: -1
     });
@@ -288,8 +305,6 @@ function update ()
 
         if (count % 50 == 0){
             player.anims.play(playerProperties.form, true);
-            // jump = Phaser.Math.Between(0, 300) * -1;
-            // jump = jump * -1;
             // enemy_2.object.x = enemy_2.object.x  + jump;
             // enemy_2.shoot(player.x, player.y);
             shoot();
@@ -307,9 +322,10 @@ function update ()
         if (cursors.up.isDown){
             playerProperties.form = "base_form_shooting";
         }
-        // else if (cursors.down.isDown){
-        //     // playerProperties.form = "form1_shooting";
-        // }
+        else if (cursors.down.isDown){
+            playerProperties.form = "form1_shooting";
+
+        }
         else if (cursors.left.isDown)
         {
             player.setVelocityX(-200);
@@ -328,6 +344,9 @@ function update ()
     
         checkBullets();
         // Enemy.checkBullets(player.y);
+        if (playerProperties.isRed){
+            flicker(playerProperties, "red");
+        }
     
         if ((( player.x - 20 <= healthPowerup.x) && (player.x + 20 >= healthPowerup.x)) && 
         (( healthPowerup.y >=  player.y - 20 ) && (healthPowerup.y <  player.y + 20))){
@@ -369,6 +388,7 @@ function bulletsToFire(stageCheck){
         bullets.create(player.x - 30, player.y - 10, "bullet").setScale(0.5);
     }
 }
+
 
 function shoot(){
     if (playerProperties.form == "base_form_shooting"){
@@ -414,13 +434,6 @@ function shoot(){
 //     }
 // }
 
-// function hitLife (player)
-// {
-//     player.setTint(0x00ff00);
-//     player.clearTint();
-//     player.setTint(0x00ff00);
-//     player.clearTint();
-// }
 
 
 function checkBullets(){
@@ -438,9 +451,10 @@ function checkBullets(){
                     if (enemy_child.health != 0){
                         enemy_child.health = enemy_child.health - 25;
                         enemy_child.tint = 0xff0000;
+                        // enemy_child.tint = "0xffc0cb";
                         enemyObject.setTint(enemy_child.tint);
                         if (enemy_child.isRed){
-                            enemy_child.tint = enemy_child.tint - 600;
+                            enemy_child.tint = enemy_child.tint - 0x100000;
                             enemyObject.setTint(enemy_child.tint);
                         }
                     }
@@ -455,24 +469,38 @@ function checkBullets(){
     
                 }
             });
+
+            if(playerProperties.form == "form1_shooting"){
+                child.play("form1_bullets", true);
+            }
         }
         
     });
 
     
-    Enemy.bullet.forEach( (bullet) => {
+    Enemy.bullet.forEach( (bullet_child) => {
         var index;
         // alert(this);
-        index = Enemy.bullet.indexOf(bullet);
-        if (bullet.y > 800){   
-            bullet.destroy();  
+        index = Enemy.bullet.indexOf(bullet_child);
+        if (bullet_child.y > 800){   
+            bullet_child.destroy();  
             Enemy.bullet.splice(index, 1);           
         }
-        
+
+        if ((( player.x - 20 <= bullet_child.x) && (player.x + 20 >= bullet_child.x)) && 
+            (( bullet_child.y >=  player.y ) && (bullet_child.y <  player.y + 20))){
+                bullet_child.destroy();
+                Enemy.bullet.splice(index, 1);
+                playerProperties.isRed = true;
+                flicker(playerProperties, "red");
+
+        }
+    
     }); 
 
 }
 
+// Checks if an explosion is displayed
 function checkExplosion(){
     explosions.children.iterate(function (child){
         if (child){
@@ -485,6 +513,7 @@ function checkExplosion(){
     });
 }
 
+// Checks if player is in contact with a powerup
 function checkPowerups(){
     if (contactHealth){
 
@@ -504,19 +533,20 @@ function checkPowerups(){
 
 }
 
+// Function that flickers player
 function flicker(objectToFlicker, flickerColor){
 
     var color ;
-    // 0x00ff00
+    var functionCount = 40;
+
+    // checks if player colour is green
     if (flickerColor == "green"){
         color = 0x00ff00;
-        // alert(color);
-        if(objectToFlicker.greenCount < 50){
-            // alert(objectToFlicker);
+        if(objectToFlicker.greenCount < functionCount){
             objectToFlicker.object.setTint(color);
             objectToFlicker.greenCount++;
         }
-        else if((objectToFlicker.greenCount >= 50) && (playerProperties.greenCount <= 100)){
+        else if((objectToFlicker.greenCount >= functionCount) && (playerProperties.greenCount <= 100)){
             objectToFlicker.object.clearTint();
             objectToFlicker.greenCount++;
         }
@@ -527,40 +557,20 @@ function flicker(objectToFlicker, flickerColor){
         }
     }
 
-    // if (flickerColor == "red"){
-    //     color = 0xff0000;
-    //     if(objectToFlicker.redCount < 50){
-    //         objectToFlicker.object.setTint(color);
-    //         objectToFlicker.redCount++;
-    //     }
-    //     else{
-    //         objectToFlicker.redCount = 0;
-    //         objectToFlicker.object.clearTint();
-    //     }
-    // }
-
-    
-
-    // if (flickerColor == "green"){
-    //     // alert("Here");
-    //     redHex = 0xff0000;
-    //     greenHex = 0x00ff00;
-    //     // alert(objectToFlicker.greenCount);
-    //     if(objectToFlicker.greenCount < 50){
-    //         // player.setTint(0x00ff00);
-    //         player.setTint(0x00ff00);
-    //         objectToFlicker.greenCount++;
-    //     }
-    //     else if((objectToFlicker.greenCount >= 50) && (playerProperties.greenCount <= 100)){
-    //         player.clearTint();
-    //         objectToFlicker.greenCount++;
-    //     }
-    //     else{
-    //         objectToFlicker.greenCount = 0;
-    //         objectToFlicker.flickerCount++;
-    //         player.clearTint();
-    //     }
-    // }
+    // checks if player colour is red
+    if (flickerColor == "red"){
+        color = 0xff0000;
+        if(objectToFlicker.redCount < functionCount){
+            // objectToFlicker.isRed = true;
+            objectToFlicker.object.setTint(color);
+            objectToFlicker.redCount++;
+        }
+        else{
+            objectToFlicker.isRed = false;
+            objectToFlicker.redCount = 0;
+            objectToFlicker.object.clearTint();
+        }
+    }
 
     
 }
