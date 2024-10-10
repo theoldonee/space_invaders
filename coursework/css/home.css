@@ -1,24 +1,24 @@
 
 section{
+    color: white;
     display: flex;
     background-color: black;
     height: 850px;
 }
 
 
-div > img{
+section > div{
+    width: 50%;
+    padding: 0 0 0 20px;
+}
+
+.story_div > img{
     display: inline-flex;
-    width: 250px;
-    height: 250px;
+    width: 200px;
+    height: 200px;
     /* border: 1px solid white; */
     float: left;
     margin-top: 30px;
-}
-
-section > div{
-    /* border: 1px solid white; */
-    width: 50%;
-    padding: 0 0 0 20px;
 }
 
 p{
@@ -28,46 +28,88 @@ p{
 
 }
 
-h1, span, p{
-    color: white;
-}
+/* h1, span, p{
+    
+} */
 
 h1{
     text-align: center;
     margin: 10px 0px;
 }
 
-.section_div {
+.highscore_section {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-#highcore_data{
+/* when no  highscore */
+/* #highcore_data{
     width: 600px;
     height: 600px;
     border: 1px solid white;
     display: flex;
     align-items: center;
     justify-content: center;
-}
+} */
 
-#highcore_data div{
+/* #highcore_data div{
     display: flex;
     flex-direction: column;
-}
+} */
 
-#highcore_data div button{
+button{
     background-color: brown;
     color: white;
-    padding: 16px;
+    padding: 15px;
     font-size: 16px;
     border: none;
 }
 
+/* when high score */
+#highcore_data{
+    width: 600px;
+    height: 600px;
+    border: 1px solid white;
+}
 
-/* .highscore_div{
+table{
+    width: 100%;
+    height: 540px;
+    text-align: center;
+}
+
+table, th, td {
+    color: white;
+    border: 1px solid white;
+    border-collapse: collapse;
+}
+
+tbody tr{
+    height: 90px;
+}
+
+.rank_img{
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-} */
+    border: none;
+}
+
+.rank_img div{
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: solid 1px white;
+}
+
+#see_more_div{
+    height: 60px;
+    width: 582px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

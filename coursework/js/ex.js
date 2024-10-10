@@ -273,7 +273,7 @@ function update ()
     }
 
     if (paused == false){
-        console.log(count);
+
         if (count % 50 == 0){
             player.anims.play(playerProperties.form, true);
             // enemy_2.object.x = enemy_2.object.x  + jump;

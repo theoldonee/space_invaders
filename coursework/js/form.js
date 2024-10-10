@@ -3,7 +3,6 @@ if (typeof(Storage) !== "undefined") {
     // localStorage.setItem("lastname", "Smith");
     // localStorage.getItem("lastname");
     // localStorage.removeItem("lastname");
-
     // localStorage.removeItem("registeredUsers");
 
 } 
@@ -114,12 +113,14 @@ function createUser(){
         password: password,
         email: email,
         logged_in: true,
-        rank: 0,
-        highscore:0,
-        enemiesKilled: 0
+        rank: Math.floor(Math.random() * 10),
+        highscore: Math.floor(Math.random() * 1000),
+        enemiesKilled: Math.floor(Math.random() * 1000),
+        playtime: Math.floor(Math.random() * 1000),
+        bulletsfired: Math.floor(Math.random() * 2000),
     };
 
-    registeredUsers.push(JSON.stringify(user));
+    registeredUsers.push(user);
     localStorage.setItem("registeredUsers", JSON.stringify(registeredUsers));
 }
 
@@ -127,7 +128,7 @@ function createUser(){
 function isUser(){
     var isUser = false;
     for (index = 0; index < registeredUsers.length; index++){
-        var user0bj = JSON.parse(registeredUsers[index]);
+        var user0bj = registeredUsers[index];
         // checks if user exist
         if (user0bj.email == email){
             user = user0bj;
