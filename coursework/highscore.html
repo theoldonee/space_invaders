@@ -17,7 +17,6 @@
         <ul>
           <li><a href="home.html">Home</a></li>
           <li><a href="">Tutorials</a></li>
-          <!-- <li><a href="">Highscores</a></li> -->
           <li class="dropdown">
             <button class="nav_button">Register/Login</button>
             <div class="dropdown_content">
@@ -33,142 +32,31 @@
       <div class="highscore_div">
         <div id="sort_div">
             <select name="Sort By" id="sort_by">
-               <option value="" disabled selected>Sort By</option>
-               <option value="highscore">Highscore</option>
-               <option value="playtime">Play time</option>
-               <option value="enemiesKilled">Enemies Killed</option>
-               <option value="playtime">Bullets Fired</option>
+                <option value="" disabled selected>Sort By</option>
+                <option value="highscore">Highscore</option>
+                <option value="playtime">Play time</option>
+                <option value="enemiesKilled">Enemies Killed</option>
+                <option value="playtime">Bullets Fired</option>
             </select>
             <button onclick="sort()">Sort</button>
-       </div>
+        </div>
         <div id="highcore_data">
-          <div id="table_div">
-              <table>
-                  <thead>
-                      <tr>
-                          <td>Rank</td>
-                          <td>Player Name</td>
-                          <td>Score</td>
-                          <td>Playtime</td>
-                          <td>Enemies Killed</td>
-                          <td>Bullets Fired</td>
-                      </tr>
-                  </thead>
-                  <tbody id="table_body">
+            <div id="table_div">
+                <table>
+                    <thead>
                         <tr>
-                            <td class="rank_img">
-                                <div>
-                                    1
-                                </div>
-                                <div>
-                                    <img src="website_images/jet_stage4.png" alt="Jet image">
-                                </div>
-                            </td>
-                            <td>#Name</td>
-                            <td>#Score</td>
-                            <td>#Play time</td>
-                            <td>#Enemies Killed</td>
-                            <td>#Bullets Fired</td>
+                            <td>Rank</td>
+                            <td>Player Name</td>
+                            <td>Score</td>
+                            <td>Playtime</td>
+                            <td>Enemies Killed</td>
+                            <td>Bullets Fired</td>
                         </tr>
-                        <!-- <tr>
-                            <td class="rank_img">
-                                <div>
-                                    1
-                                </div>
-                                <div>
-                                    <img src="website_images/jet_stage4.png" alt="Jet image">
-                                </div>
-                            </td>
-                            <td>#Name</td>
-                            <td>#Score</td>
-                        </tr> -->
-                        <!-- <tr>
-                            <td class="rank_img">
-                                <div>
-                                    1
-                                </div>
-                                <div>
-                                    <img src="website_images/jet_stage4.png" alt="Jet image">
-                                </div>
-                            </td>
-                            <td>#Name</td>
-                            <td>#Score</td>
-                        </tr> -->
-                        <!-- <tr>
-                            <td class="rank_img">
-                                <div>
-                                    1
-                                </div>
-                                <div>
-                                    <img src="website_images/jet_stage4.png" alt="Jet image">
-                                </div>
-                            </td>
-                            <td>#Name</td>
-                            <td>#Score</td>
-                        </tr> -->
-                        <!-- <tr>
-                            <td class="rank_img">
-                                <div>
-                                    1
-                                </div>
-                                <div>
-                                    <img src="website_images/jet_stage4.png" alt="Jet image">
-                                </div>
-                            </td>
-                            <td>#Name</td>
-                            <td>#Score</td>
-                        </tr> -->
-                        <!-- <tr>
-                            <td class="rank_img">
-                                <div>
-                                    1
-                                </div>
-                                <div>
-                                    <img src="website_images/jet_stage4.png" alt="Jet image">
-                                </div>
-                            </td>
-                            <td>#Name</td>
-                            <td>#Score</td>
-                        </tr> -->
-                        <!-- <tr>
-                            <td class="rank_img">
-                                <div>
-                                    1
-                                </div>
-                                <div>
-                                    <img src="website_images/jet_stage4.png" alt="Jet image">
-                                </div>
-                            </td>
-                            <td>#Name</td>
-                            <td>#Score</td>
-                        </tr> -->
-                        <!-- <tr>
-                            <td class="rank_img">
-                                <div>
-                                    1
-                                </div>
-                                <div>
-                                    <img src="website_images/jet_stage4.png" alt="Jet image">
-                                </div>
-                            </td>
-                            <td>#Name</td>
-                            <td>#Score</td>
-                        </tr> -->
-                        <!-- <tr>
-                            <td class="rank_img">
-                                <div>
-                                    1
-                                </div>
-                                <div>
-                                    <img src="website_images/jet_stage4.png" alt="Jet image">
-                                </div>
-                            </td>
-                            <td>#Name</td>
-                            <td>#Score</td>
-                        </tr> -->
-                  </tbody>
-              </table>
-          </div>
+                    </thead>
+                    <tbody id="table_body">
+                    </tbody>
+                </table>
+            </div>
         </div>
       </div>
     </section>
@@ -180,5 +68,5 @@
       </div>
     </footer>
   </body>
-  <script src="js/test.js"></script>
+  <script src="js/highscore.js"></script>
 </html>

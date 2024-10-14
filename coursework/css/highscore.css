@@ -2,7 +2,6 @@ section{
     color: white;
     display: flex;
     flex-direction: column;
-    /* justify-content: center; */
     align-items: center;
     background-color: black;
     width: 100%;
@@ -11,7 +10,6 @@ section{
 
 .highscore_div{
     width: 95%;
-    /* border: 1px solid white; */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -41,6 +39,7 @@ button:active{
 
 #table_div{
     height: 100%;
+    overflow-y: scroll;
 }
 
 table{
@@ -56,8 +55,6 @@ table, th, td {
 
 tbody{
     height: 100%;
-    overflow: auto;
-    scroll-behavior: smooth;
 }
 
 tbody tr{
