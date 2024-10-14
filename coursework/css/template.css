@@ -28,7 +28,6 @@ body {
     height: 720px;
 }
 
-/* Start Ws schools */
 .nav_button {
     background-color: brown;
     color: white;
@@ -61,8 +60,6 @@ body {
 .dropdown_content a:hover {background-color: #ddd;}
 .dropdown:hover .dropdown_content {display: block;}
 .dropdown:hover .dropbtn {background-color: brown;}
-
-/* End Ws schools */
 
 nav{
     
