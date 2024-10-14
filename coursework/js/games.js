@@ -57,16 +57,20 @@ var playerProperties = {
 }
 
 class Enemy{
+    static enemyType1Children = [];
+    static enemyType2Children = [];
+    static enemyType3Children = []; 
     static children = [];
+
     static bullet = [];
     // static bulletVelX = [];
     static physics;
     static tweens;
 
-    constructor(){
-        this.type = "enemy_type_1"
+    constructor(type, x){
+        this.type = type;
         this.health;
-        this.object = Enemy.physics.add.sprite(400, 100,this.type).setScale(1.7);
+        this.object = Enemy.physics.add.sprite(x, 100,this.type).setScale(1.7);
         this.isGreen = false;
         this.isRed = false;
         this.tint;
@@ -75,6 +79,7 @@ class Enemy{
         this.greenCount = 0;
         this.redCount = 0;
         this.form = 'normal';
+        this.createdTime = new Date();
         Enemy.checkType(this);
         Enemy.addEnemy(this);
     }
@@ -89,21 +94,58 @@ class Enemy{
 
     static addEnemy(enemyObject) {
         this.children.push(enemyObject);
+        if (enemyObject.type == "enemy_type_1"){
+            this.enemyType1Children.push(enemyObject);
+        }
+        if (enemyObject.type == "enemy_type_2"){
+            this.enemyType1Children.push(enemyObject);
+        }
+        if (enemyObject.type == "enemy_type_3"){
+            this.enemyType1Children.push(enemyObject);
+        }
+    }
+
+    static createEnemy(enemiesToCreate){
+        for (var type of enemiesToCreate){
+            enemy = new Enemy(type.type, type.location);
+        }
     }
 
     static removeEnemy(enemyObject) {
-        this.children.pop(enemyObject);
+
+        var indexInChildren = this.children.indexOf(enemyObject);
+        this.children.splice(indexInChildren, 1);  
+
+        if (enemyObject in this.enemyType1Children){
+
+            var type1Index = this.enemyType1Children.indexOf(enemyObject);
+            this.enemyType1Children.splice(type1Index, 1);
+        }
+
+        if (enemyObject in this.enemyType2Children){
+
+            var type2Index = this.enemyType2Children.indexOf(enemyObject);
+            this.enemyType2Children.splice(type2Index, 1);
+        }
+        if (enemyObject in this.enemyType3Children){
+
+            var type3Index = this.enemyType3Children.indexOf(enemyObject);
+            this.enemyType3Children.splice(type3Index, 1);
+        }
     }
 
     static checkType(enemyObject){
         if (enemyObject.type == "enemy_type_1"){
-            enemyObject.health = 200;
+            enemyObject.health = 50;
         }
-        if (enemyObject.type == "enemy_type_2"){
+        if (enemyObject.type == "type_1_upgraded"){
             enemyObject.health = 100;
         }
-        if (enemyObject.type == "enemy_type_3"){
+        if (enemyObject.type == "enemy_type_2"){
             enemyObject.health = 150;
+        }
+        if (enemyObject.type == "enemy_type_3"){
+            enemyObject.health = 200;
         }
     }
 
@@ -118,16 +160,66 @@ class Enemy{
     
     shoot(x, y) {
         var enemyBullet;
-        if (this.form == "normal") {
+        if (this.type == "enemy_type_1") {
             enemyBullet = Enemy.physics.add.sprite(this.object.x + 4, this.object.y + 10,"enemy_bullet").setScale(0.5);
+            Enemy.bullet.push(enemyBullet);
+        }else{
+            enemyBullet = Enemy.physics.add.sprite(this.object.x + 4, this.object.y + 18,"enemy_bullet").setScale(0.5);
             Enemy.bullet.push(enemyBullet);
         }
 
         Enemy.setBulletVelocity(x, y, enemyBullet);
     }
 
+    getElapsedTime() {
+        const now = new Date();
+        return (now - this.createdTime) / 1150;  // Return time in seconds
+    }
+
 }
 
+class Controller{
+    static MaxCount = 10;
+    static loaderCount = 1;
+    static enemyTypes = ["enemy_type_1", "enemy_type_2","enemy_type_3"]
+
+    static loadEnemies(){
+        var enemy_info, enemy_info1, enemy_info2, enemy_info3;
+    
+        if (this.loaderCount == 1){
+            enemy_info = {type: "enemy_type_1", location: 500 };
+            Enemy.createEnemy([enemy_info]);
+        }
+        if (this.loaderCount == 2){
+            enemy_info = {type: "enemy_type_1", location: 300 };
+            enemy_info1 = {type: "enemy_type_1", location: 700 };
+            Enemy.createEnemy([enemy_info, enemy_info1]);
+        }
+        if (this.loaderCount == 3){
+            enemy_info = {type: "enemy_type_1", location: 250 };
+            enemy_info1 = {type: "enemy_type_1", location: 500 };
+            enemy_info2 = {type: "enemy_type_1", location: 750 };
+            Enemy.createEnemy([enemy_info, enemy_info1, enemy_info2]);
+        }
+        if (this.loaderCount == 4){
+            enemy_info = {type: "enemy_type_1", location: 200 };
+            enemy_info1 = {type: "enemy_type_1", location: 400 };
+            enemy_info2 = {type: "enemy_type_1", location: 600 };
+            enemy_info3 = {type: "enemy_type_1", location: 800 };
+            Enemy.createEnemy([enemy_info, enemy_info1, enemy_info2, enemy_info3]);
+        }
+        this.loaderCount++;
+    }
+
+    static check(){
+
+        if (Enemy.children.length == 0){
+            this.loadEnemies();
+        }
+    }
+
+    
+}
 
 function preload ()
 {
@@ -141,7 +233,10 @@ function preload ()
     this.load.image('health', 'sprites/powerups/health.png');
 
 
-    this.load.spritesheet('enemy_type_1', 'sprites/enemies/enemy_type_1.png', { frameWidth: 15, frameHeight: 19 });
+    this.load.spritesheet('enemy_type_1', 'sprites/enemies/enemy_type_1.png', { frameWidth: 23, frameHeight: 19 });
+    this.load.spritesheet('type_1_upgraded', 'sprites/enemies/enemy_type_1_upgraded.png', { frameWidth: 26, frameHeight: 19 });
+    this.load.spritesheet('enemy_type_2', 'sprites/enemies/enemy_type_2.png', { frameWidth: 32, frameHeight: 26 });
+    this.load.spritesheet('enemy_type_3', 'sprites/enemies/enemy_type_3.png', { frameWidth: 32, frameHeight: 26 });
 
 }
 
@@ -153,7 +248,7 @@ function create ()
     player = this.physics.add.sprite(500, 700, "jet").setScale(1.5);
     playerProperties.object = player;
 
-    enemy_2 = new Enemy();
+    // enemy_2 = new Enemy("type_1_upgraded");
 
     healthPowerup = this.physics.add.sprite(500, 300, 'health');
     player.setCollideWorldBounds(true);
@@ -218,6 +313,21 @@ function create ()
     });
 
 
+    this.anims.create({
+        key: "jump",
+        frames: this.anims.generateFrameNumbers('enemy_type_2', { start: 1, end: 3 }),
+        frameRate: frameRate,
+        repeat: 2
+    });
+
+    this.anims.create({
+        key: "blink",
+        frames: this.anims.generateFrameNumbers('enemy_type_3', { start: 1, end: 6 }),
+        frameRate: frameRate,
+        repeat: 1
+    });
+
+
     bullets = this.physics.add.group();
     explosions = this.physics.add.group();
 
@@ -273,7 +383,10 @@ function update ()
     }
 
     if (paused == false){
-        console.log(count);
+        // console.log(count);
+        Controller.check();
+
+    
         if (count % 50 == 0){
             player.anims.play(playerProperties.form, true);
             // enemy_2.object.x = enemy_2.object.x  + jump;
@@ -284,9 +397,13 @@ function update ()
         if (count % 150 == 0){
             // jump = jump * -1;
             // enemy_2.object.x = enemy_2.object.x  + jump;
-            if (enemy_2.health != 0){
-                enemy_2.shoot(player.x, player.y);
-            } 
+            // if (enemy_2.health != 0){
+            //     enemy_2.shoot(player.x, player.y);
+            // } 
+
+            Enemy.children.forEach((child) =>{
+                child.shoot(playerProperties.object.x, playerProperties.object.y);
+            });
         }
     
         if (cursors.up.isDown){
@@ -298,19 +415,22 @@ function update ()
         // }
         else if (cursors.left.isDown)
         {
-            player.setVelocityX(-200);
+            player.setVelocityX(-100);
             // playerProperties.form = "form2_shooting";
         }
         else if (cursors.right.isDown)
         {
-            player.setVelocityX(200);
+            player.setVelocityX(100);
             // playerProperties.form = "form3_shooting";
         }
         else{
             player.setVelocityX(0);
         }
         count++;
-    
+        
+        // if(count > 1000){
+        //     Enemy.children[0].object.anims.play('jump', true);
+        // }
     
         checkBullets();
         // Enemy.checkBullets(player.y);
@@ -326,7 +446,7 @@ function update ()
     
         checkPowerups();
     
-        if (count == 1050){
+        if (count == 1350){
             count = 0;
         }
         checkExplosion();
@@ -410,7 +530,6 @@ function checkBullets(){
     bullets.children.iterate(function (child) {
         if (child){
             if (child.y < 0){
-                // child.disableBody(true, true);   
                 child.destroy();             
             }
 
@@ -429,7 +548,7 @@ function checkBullets(){
                         }
                     }
                     if (enemy_child.health == 0){
-                        playerProperties.points = playerProperties.points + 1;
+                        playerProperties.points = playerProperties.points + 20;
                         score.setText(`Score: ${playerProperties.points}`);
                         explosion = explosions.create(enemyObject.x, enemyObject.y, "explosion");
                         explosion.anims.play("boom", true);
