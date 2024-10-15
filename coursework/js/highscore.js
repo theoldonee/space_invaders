@@ -14,8 +14,6 @@ var list;
 var tableList = [];
 var sortedList = [];
 var tableBody = document.getElementById("table_body");
-// var topPos = myElement.offsetTop;
-// document.getElementById('table_body').scrollTop = topPos;
 function showHighscores(){
     sort();
 }
@@ -26,9 +24,9 @@ function sort(){
     if(!sort_by){
         sort_by = "highscore";
     }
+    
     sortedList = [];
     tableList = [];
-    out = '';
 
     for(user of registeredUsers){
         tableList.push(user[sort_by]);

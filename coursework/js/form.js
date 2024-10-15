@@ -1,14 +1,6 @@
-if (typeof(Storage) !== "undefined") {
-    // Code for localStorage/sessionStorage.
-    // localStorage.setItem("lastname", "Smith");
-    // localStorage.getItem("lastname");
-    // localStorage.removeItem("lastname");
-    // localStorage.removeItem("registeredUsers");
-
-} 
-else {
+if (typeof(Storage) == "undefined") {
     alert("Sorry! No Web Storage support..");
-}
+} 
 
 var registeredUsers;
 var displayContent;

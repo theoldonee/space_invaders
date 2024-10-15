@@ -1,15 +1,3 @@
-if (typeof(Storage) !== "undefined") {
-    // Code for localStorage/sessionStorage.
-    // localStorage.setItem("lastname", "Smith");
-    // localStorage.getItem("lastname");
-    // localStorage.removeItem("lastname");
-    // localStorage.removeItem("registeredUsers");
-
-} 
-else {
-    alert("Sorry! No Web Storage support..");
-}
-
 
 function redirect(display_content){
     window.location.href = `form.html?${display_content}`;
@@ -36,63 +24,26 @@ if (localStorage.registeredUsers){
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="rank_img">
-                            <div>
-                                1
-                            </div>
-                            <div>
-                                <img src="website_images/jet_stage4.png" alt="Jet image">
-                            </div>
-                        </td>
-                        <td>#Name</td>
-                        <td>#Score</td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-
+                    ${showTopFive()}
                 </tbody>
             </table>
         </div>
         <div id="see_more_div">
             <button onclick="showHighscorePage()">See more</button>
         </div>
-    `
+    `;
 }else{
     
     highscore_data_div.style.display = "flex";
     highscore_data_div.style.alignItems = "center";
     highscore_data_div.style.justifyContent = "center";
-    
-    // var inner_div = document.querySelector("#highcore_data div");
-    // inner_div.style.display = "flex";
-    // inner_div.style.flexDirection = "column";
-
 
     highscore_data_div.innerHTML = `
         <div>
             <span>Be the first to taste glory</span>
             <button onclick="redirect('register',false)">Register</button>
         </div>
-    `
+    `;
 }
 
 function showHighscorePage(){
@@ -100,5 +51,88 @@ function showHighscorePage(){
 }
 
 
+function showTopFive(){
+    var out = ``;
+    
+    sortedList = [];
+    tableList = [];
 
+    for(user of registeredUsers){
+        tableList.push(user["highscore"]);
+    };
+    tableList.sort(function(a, b){return b-a});
 
+    for(score of tableList){
+        for (user of registeredUsers){
+            if(user["highscore"] == score){
+                sortedList.push(user);
+            }
+        }
+    }
+
+    if (registeredUsers.lenght > 5){
+        for(i = 0; i < 5; i++){
+            out.concat(userInfoRow(sortedList[i], i)); 
+        }
+    }
+    else{
+        var emptyRowCount;
+        emptyRowCount = 5 - sortedList.lenght;
+
+        if(sortedList.lengh != 0){
+            for(i = 0; i < 5; i++){
+                out += userInfoRow(sortedList[i], i);
+                
+
+            }
+        }
+
+        for (i = 0; i < emptyRowCount; i++){
+            out.concat(emptyRow());
+        }
+    }
+
+    console.log(out);
+    return out;
+}
+
+function userInfoRow(user, i){
+    var number = i+1;
+    var image_to_display;
+
+        if (i == 0){
+            image_to_display = "jet_stage4";
+        }else if (i == 1){
+            image_to_display = "jet_stage3";
+        }else if (i == 2){
+            image_to_display = "jet_stage2";
+        }else{
+            image_to_display = "jet_stage1";
+        }
+    var row = `
+        <tr>
+            <td class="rank_img">
+                <div>
+                    ${number}
+                </div>
+                <div>
+                    <img src="website_images/${image_to_display}.png" alt="Jet image">
+                </div>
+            </td>
+            <td>${user.username}</td>
+            <td>${user.highscore}</td>
+        </tr>
+    `
+    return row;
+}
+
+function emptyRow(){
+    var row = `
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    `
+    return row;
+}
