@@ -29,8 +29,8 @@ body {
 }
 
 .nav_button {
-    background-color: brown;
-    color: white;
+    background-color: white;
+    color: black;
     padding: 16px;
     font-size: 16px;
     border: none;
@@ -44,26 +44,27 @@ body {
 .dropdown_content {
     display: none;
     position: absolute;
-    background-color: #f1f1f1;
+    background-color: black;
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
+    border: 1px solid white;
 }
 
 .dropdown_content a {
-    color: black;
+    color: white;
     padding: 12px 16px;
     text-decoration: none;
     display: block;
 }
 
-.dropdown_content a:hover {background-color: #ddd;}
+.dropdown_content a:hover {background-color: white; color: black;}
 .dropdown:hover .dropdown_content {display: block;}
 .dropdown:hover .dropbtn {background-color: brown;}
 
 nav{
-    
-    border: solid black 1px;
+    background-color: black;
+    border: 1px solid white;
 }
 
 nav ul{
@@ -85,6 +86,8 @@ nav ul li select {
 }
 
 nav ul li a{
+    /* background-color: aqua; */
+    color: white;
     text-decoration: none;
 }
 
@@ -101,6 +104,7 @@ footer div{
     justify-content: space-around;
     height: 50px;
     color: white;
-    background-color: brown;
+    background-color: black;
+    border: 1px solid white;
 }
 
