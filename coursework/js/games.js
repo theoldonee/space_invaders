@@ -3,6 +3,7 @@ var config = {
     type: Phaser.AUTO,
     width: 1000,
     height: 810,
+    parent: "game_div",
     scene: {
         preload: preload,
         create: create,
