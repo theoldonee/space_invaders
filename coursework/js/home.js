@@ -1,14 +1,15 @@
-
+// redirects to form page
 function redirect(display_content){
     window.location.href = `form.html?${display_content}`;
 }
 
-// var registeredUsers;
+
 var highscore_data_div = document.getElementById("highcore_data");
 highscore_data_div.style.width = "600";
 highscore_data_div.style.height = "600";
 highscore_data_div.style.border = "1px solid white";
-// if registred users == 0, show, be the first to reach greateness
+
+// Checks if registred users == 0
 if (localStorage.registeredUsers){
 
     var registeredUsers;
@@ -46,22 +47,25 @@ if (localStorage.registeredUsers){
     `;
 }
 
+// Function to redirect to highscore page
 function showHighscorePage(){
     window.location.href = `highscore.html`;
 }
 
-
+// Get's and sort's top 5 scores.
 function showTopFive(){
     var out = ``;
     
     sortedList = [];
     tableList = [];
 
+    // adds user highscores to tablelist
     for(user of registeredUsers){
         tableList.push(user["highscore"]);
     };
     tableList.sort(function(a, b){return b-a});
 
+    // adds user to sortedList based on highscore
     for(score of tableList){
         for (user of registeredUsers){
             if(user["highscore"] == score){
@@ -70,32 +74,34 @@ function showTopFive(){
         }
     }
 
+    // checks if registered users are more than 5 and gets first 5
     if (registeredUsers.lenght > 5){
         for(i = 0; i < 5; i++){
-            out.concat(userInfoRow(sortedList[i], i)); 
+            out += userInfoRow(sortedList[i], i); 
         }
     }
     else{
         var emptyRowCount;
         emptyRowCount = 5 - sortedList.lenght;
 
+        // checks if users exist in the sorted list
         if(sortedList.lengh != 0){
             for(i = 0; i < 5; i++){
                 out += userInfoRow(sortedList[i], i);
-                
-
+        
             }
         }
 
+        // generates empty rows
         for (i = 0; i < emptyRowCount; i++){
-            out.concat(emptyRow());
+            out += emptyRow();
         }
     }
 
-    console.log(out);
     return out;
 }
 
+// Returns a row with user data
 function userInfoRow(user, i){
     var number = i+1;
     var image_to_display;
@@ -126,6 +132,7 @@ function userInfoRow(user, i){
     return row;
 }
 
+// Returns an empty row
 function emptyRow(){
     var row = `
         <tr>
