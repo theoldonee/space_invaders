@@ -14,10 +14,14 @@ button:hover{
     cursor: pointer;
 }
 
+#game_div{
+    background-color: black;
+}
 
 canvas {   
     display : block;   
     margin : auto;
+    border: 1px solid white;
 }
 
 h2{
@@ -77,16 +81,22 @@ nav ul{
 }
 
 nav ul li {
+    height: 50px;
+    width: 90px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-weight: bolder;
     list-style: none;
+    transition: border 1;
 }
 
-nav ul li select {
-    width: 110px;
+nav ul li:hover {
+    cursor: pointer;
+    border: 1px solid white;
 }
 
 nav ul li a{
-    /* background-color: aqua; */
     color: white;
     text-decoration: none;
 }
