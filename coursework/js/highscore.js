@@ -7,8 +7,6 @@ function redirect(display_content){
 var registeredUsers;
 registeredUsers = JSON.parse(localStorage.registeredUsers);
 
-var out;
-var tableRow;
 
 var list;
 var tableList = [];
@@ -20,11 +18,13 @@ function showHighscores(){
 
 
 function sort(){
+    var out = '';
+    var tableRow = '';
     var sort_by = document.getElementById("sort_by").value;
     if(!sort_by){
         sort_by = "highscore";
     }
-    
+
     sortedList = [];
     tableList = [];
 
@@ -53,6 +53,7 @@ function sort(){
         }else{
             image_to_display = "jet_stage1";
         }
+
         tableRow = `
             <tr>
                 <td class="rank_img">
