@@ -59,12 +59,12 @@ var playerProperties = {
 
 class Enemy{
     static enemyType1Children = [];
+    static type1UpgradedChildren = [];
     static enemyType2Children = [];
     static enemyType3Children = []; 
     static children = [];
 
     static bullet = [];
-    // static bulletVelX = [];
     static physics;
     static tweens;
 
@@ -92,17 +92,24 @@ class Enemy{
     static setTweens(classClass){
         this.tweens = classClass;
     }
+    
 
     static addEnemy(enemyObject) {
         this.children.push(enemyObject);
         if (enemyObject.type == "enemy_type_1"){
             this.enemyType1Children.push(enemyObject);
         }
-        if (enemyObject.type == "enemy_type_2"){
-            this.enemyType1Children.push(enemyObject);
+
+        if (enemyObject.type == "type_1_upgraded"){
+            this.type1UpgradedChildren.push(enemyObject);
         }
+
+        if (enemyObject.type == "enemy_type_2"){
+            this.enemyType2Children.push(enemyObject);
+        }
+
         if (enemyObject.type == "enemy_type_3"){
-            this.enemyType1Children.push(enemyObject);
+            this.enemyType3Children.push(enemyObject);
         }
     }
 
@@ -113,26 +120,37 @@ class Enemy{
     }
 
     static removeEnemy(enemyObject) {
-
         var indexInChildren = this.children.indexOf(enemyObject);
         this.children.splice(indexInChildren, 1);  
 
-        if (enemyObject in this.enemyType1Children){
-
+        if (this.isInArray(enemyObject, this.enemyType1Children)){
             var type1Index = this.enemyType1Children.indexOf(enemyObject);
             this.enemyType1Children.splice(type1Index, 1);
         }
+            
+        if (this.isInArray(enemyObject, this.type1UpgradedChildren)){
+            var type1Upgradedindex = this.type1UpgradedChildren.indexOf(enemyObject);
+            this.type1UpgradedChildren.splice(type1Upgradedindex, 1);
+        }
 
-        if (enemyObject in this.enemyType2Children){
-
+        if (this.isInArray(enemyObject, this.enemyType2Children)){
             var type2Index = this.enemyType2Children.indexOf(enemyObject);
             this.enemyType2Children.splice(type2Index, 1);
         }
-        if (enemyObject in this.enemyType3Children){
-
+        if (this.isInArray(enemyObject, this.enemyType3Children)){
             var type3Index = this.enemyType3Children.indexOf(enemyObject);
             this.enemyType3Children.splice(type3Index, 1);
         }
+    }
+
+    static isInArray(enemyObject, array){
+        for(var i = 0; i < array.length; i++){
+            if( array[i] == enemyObject){
+                return true;
+            }
+        }
+
+        return false;
     }
 
     static checkType(enemyObject){
@@ -174,16 +192,28 @@ class Enemy{
 
     getElapsedTime() {
         const now = new Date();
-        return (now - this.createdTime) / 1150;  // Return time in seconds
+        return Math.floor((now - this.createdTime) / 1150);  // Return time in seconds
     }
+
+    jump(){
+        var location = Math.floor(Math.random() * 800);
+
+        if (location < 50){
+            location = 50;
+        }
+
+        this.object.x = location;
+    }
+
 
 }
 
 class Controller{
-    static MaxCount = 10;
     static loaderCount = 1;
-    static enemyTypes = ["enemy_type_1", "enemy_type_2","enemy_type_3"]
-
+    // static loaderCount = 7;
+    static enemyTypes = ["enemy_type_1", "type_1_upgraded", "enemy_type_2","enemy_type_3"]
+    static enemyToLoadIndex = 0;
+    // static enemyToLoadIndex = 2;
     static loadEnemies(){
         var enemy_info, enemy_info1, enemy_info2, enemy_info3;
     
@@ -202,14 +232,29 @@ class Controller{
             enemy_info2 = {type: "enemy_type_1", location: 750 };
             Enemy.createEnemy([enemy_info, enemy_info1, enemy_info2]);
         }
-        if (this.loaderCount == 4){
-            enemy_info = {type: "enemy_type_1", location: 200 };
-            enemy_info1 = {type: "enemy_type_1", location: 400 };
-            enemy_info2 = {type: "enemy_type_1", location: 600 };
-            enemy_info3 = {type: "enemy_type_1", location: 800 };
-            Enemy.createEnemy([enemy_info, enemy_info1, enemy_info2, enemy_info3]);
+
+        if (this.loaderCount > 3 & this.loaderCount < 11){
+
+            if(this.loaderCount % 2 == 0){
+                enemy_info = {type: this.enemyTypes[this.enemyToLoadIndex], location: 200 };
+                enemy_info1 = {type: this.enemyTypes[this.enemyToLoadIndex], location: 400 };
+                enemy_info2 = {type: this.enemyTypes[this.enemyToLoadIndex], location: 600 };
+                enemy_info3 = {type: this.enemyTypes[this.enemyToLoadIndex], location: 800 };
+                Enemy.createEnemy([enemy_info, enemy_info1, enemy_info2, enemy_info3]);
+            }else{
+                enemy_info = {type: this.enemyTypes[this.enemyToLoadIndex + 1], location: 200 };
+                enemy_info1 = {type: this.enemyTypes[this.enemyToLoadIndex], location: 400 };
+                enemy_info2 = {type: this.enemyTypes[this.enemyToLoadIndex], location: 600 };
+                enemy_info3 = {type: this.enemyTypes[this.enemyToLoadIndex + 1], location: 800 };
+                Enemy.createEnemy([enemy_info, enemy_info1, enemy_info2, enemy_info3]);
+                this.enemyToLoadIndex++;
+            }
         }
-        this.loaderCount++;
+
+        if (this.loaderCount < 11){
+            this.loaderCount++;
+        }
+        
     }
 
     static check(){
@@ -217,6 +262,20 @@ class Controller{
         if (Enemy.children.length == 0){
             this.loadEnemies();
         }
+
+        Enemy.enemyType2Children.forEach((child) => {
+            if((child.getElapsedTime() + 1) % 5 == 0){
+                child.object.anims.play("jump");
+                child.jump();
+            }
+        });
+
+        Enemy.enemyType3Children.forEach((child) => {
+            if((child.getElapsedTime() + 1) % 8 == 0){
+                child.object.anims.play("blink");
+            }
+        });
+        
     }
 
     
@@ -248,8 +307,6 @@ function create ()
     
     player = this.physics.add.sprite(500, 700, "jet").setScale(1.5);
     playerProperties.object = player;
-
-    // enemy_2 = new Enemy("type_1_upgraded");
 
     healthPowerup = this.physics.add.sprite(500, 300, 'health');
     player.setCollideWorldBounds(true);
@@ -323,7 +380,7 @@ function create ()
 
     this.anims.create({
         key: "blink",
-        frames: this.anims.generateFrameNumbers('enemy_type_3', { start: 1, end: 6 }),
+        frames: this.anims.generateFrameNumbers('enemy_type_3', { start: 0, end: 6 }),
         frameRate: frameRate,
         repeat: 1
     });
@@ -434,7 +491,6 @@ function update ()
         // }
     
         checkBullets();
-        // Enemy.checkBullets(player.y);
         if (playerProperties.isRed){
             flicker(playerProperties, "red");
         }
@@ -455,7 +511,6 @@ function update ()
     }
     
 }
-
 
 
 function bulletsToFire(stageCheck){
@@ -500,31 +555,6 @@ function shoot(){
     });
     
 }
-// function collectStar (player, star)
-// {
-//     star.disableBody(true, true);
-
-//     score += 10;
-//     scoreText.setText('Score: ' + score);
-//     // alert(stars.countActive(true));
-
-//     if (stars.countActive(true) - 1 === 0)
-//     {
-//         // alert("Here");
-//         stars.children.iterate(function (child) {
-
-//             child.enableBody(true, child.x, 0, true, true);
-
-//         });
-
-//         var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
-
-//         var bomb = bombs.create(x, 16, 'bomb');
-//         bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
-
-//     }
-// }
-
 
 
 function checkBullets(){
