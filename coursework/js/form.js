@@ -1,3 +1,5 @@
+import { UserManager } from "./account.js";
+
 if (typeof(Storage) == "undefined") {
     alert("Sorry! No Web Storage support..");
 } 
@@ -6,14 +8,13 @@ var registeredUsers;
 var displayContent;
 var displayErrorMsg;
 
-// 
 window.onload = function (){
 
-    params = window.location.search.split("?")[1];
+    var params = window.location.search.split("?")[1];
     displayContent = params.split("$")[0];
     displayErrorMsg = params.split("$")[1];
-    // alert("hello");
     serveForm();
+
     // displays error message
     if (displayErrorMsg){
         document.getElementById("error_message").style.display = "inline";
@@ -21,10 +22,30 @@ window.onload = function (){
 
     // checks if registeredUsers exist as a property of local storage
     if (localStorage.registeredUsers){
-        registeredUsers = JSON.parse(localStorage.registeredUsers);
+        // registeredUsers = JSON.parse(localStorage.registeredUsers);
+        registeredUsers = UserManager.getAllUsers();
     }else{
         registeredUsers = [];
     }
+
+    document.getElementById("submit").addEventListener("click", () => {
+        checkValues();
+    });
+
+    if (displayContent == "register"){
+        document.getElementById("male").addEventListener("click", () => {
+            toggle("male");
+        });
+    
+        document.getElementById("female").addEventListener("click", () => {
+            toggle("female");
+        });
+    
+        document.getElementById("other").addEventListener("click", () => {
+            toggle("other");
+        });
+    }
+    
 };
 
 // redirects user to form page
@@ -40,26 +61,23 @@ function redirect(displayContent, message){
 
 
 var formSection = document.getElementById("section_1");
-var gender;
-
-
-var userName;
-var email;
-var password; 
-var dob;
+var gender, userName, email, password, dob;
 
 // checks if user and password filled isn't empty
 function checkEmailAndPassword(){
-    if (!email) {
+    if (!UserManager.isEmail(email)) {
+        
+        alert("Email not valid");
         return false;
-    }
-    else if (!password) {
+         
+    }else if (!password) {
         return false;
     }
     else{
         return true;
     }
 }
+
 
 function checkValues(){
     email = document.getElementById("email").value;
@@ -71,7 +89,7 @@ function checkValues(){
         dob = document.getElementById("DOB").value;
 
         if (!checkEmailAndPassword()){
-            alert("Username or password field not filled");
+            alert("Username or password field not filled with valid data");
         }else if(!userName){
             alert("Name is required");
         }
@@ -97,6 +115,8 @@ function checkValues(){
     }   
 }
 
+
+
 var user;
 // creates a user
 function createUser(){
@@ -113,22 +133,8 @@ function createUser(){
     };
 
     registeredUsers.push(user);
-    localStorage.setItem("registeredUsers", JSON.stringify(registeredUsers));
-}
-
-// returns true user exist
-function isUser(){
-    var isUser = false;
-    for (index = 0; index < registeredUsers.length; index++){
-        var user0bj = registeredUsers[index];
-        // checks if user exist
-        if (user0bj.email == email){
-            user = user0bj;
-            isUser = true;
-        }
-    }
-
-    return isUser;
+    // localStorage.setItem("registeredUsers", JSON.stringify(registeredUsers));
+    UserManager.updateRegisteredUsers(registeredUsers);
 }
 
 // registers a user
@@ -136,7 +142,7 @@ function register(){
     // checks if users exist
     if (registeredUsers.length != 0){
         // redirects to login page if user exist
-        if (isUser()){
+        if (UserManager.isUser(email)){
             redirect("login", true)
         }
         else{
@@ -158,8 +164,9 @@ function login(){
     // checks if users exist
     if (registeredUsers.length != 0){
         // cheks if user exist
-        if (isUser()){
+        if (UserManager.isUser(email)){
             // checks if the password is correct
+            var user = UserManager.getUser(email);
             if (password == user.password){
                 window.location.href = `game.html?${user.email}`;
             }else{
@@ -246,14 +253,14 @@ function serveForm(){
                         <div class="input_div">
                             <i class="fa-solid fa-venus-mars"></i>
                             <div id="gender_div">
-                                <button onclick="toggle('male')" id="male">Male</button>
-                                <button onclick="toggle('female')" id="female">Female</button>
-                                <button onclick="toggle('other')" id="other">Other</button>
+                                <button id="male">Male</button>
+                                <button id="female">Female</button>
+                                <button id="other">Other</button>
                             </div>
                             
                         </div>
                         
-                        <button onclick="checkValues()" id="register_button">Register</button>
+                        <button  id="submit">Register</button>
 
                     </div>
                 </div>
@@ -279,7 +286,7 @@ function serveForm(){
                             <input type="text" placeholder="Password" id="password">
                         </div>
                         
-                        <button onclick="checkValues()" id="login_button">Login</button>
+                        <button id="submit">Login</button>
                     </div>
                 </div>
             </div>
