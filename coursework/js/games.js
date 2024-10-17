@@ -1,3 +1,4 @@
+import { UserManager } from "./account.js";
 
 var config = {
     type: Phaser.AUTO,
@@ -27,23 +28,24 @@ window.onload = function (){
         alert("You must login to play");
     }
     else{
-       game  = new Phaser.Game(config);
+        if (UserManager.isUser(email)){
+            game  = new Phaser.Game(config);
+        }else{
+            alert("Only registered users can play");
+        }
+       
     }
 };
 
 
 
 var score = 0;;
-var jump = 200;
 var frameRate = 5;
-var scoreText;
 var count = 0;
 var paused = false;
 var contactHealth = false;
-var player;
-var enemy;
-var enemy_2;
 var healthPowerup;
+var player, bullets, explosions, cursors, keyboard;
 
 var playerProperties = {
     health: 400,
@@ -54,7 +56,10 @@ var playerProperties = {
     greenCount: 0,
     redCount: 0,
     form: 'base_form_shooting',
-    points: 0
+    points: 0,
+    enemiesKilled: 0,
+    bulletsFired: 0,
+    currentPlayTime: 0,
 }
 
 class Enemy{
@@ -115,6 +120,7 @@ class Enemy{
 
     static createEnemy(enemiesToCreate){
         for (var type of enemiesToCreate){
+            var enemy;
             enemy = new Enemy(type.type, type.location);
         }
     }
@@ -205,32 +211,29 @@ class Enemy{
         this.object.x = location;
     }
 
-
-}
-
-class Controller{
     static loaderCount = 1;
     // static loaderCount = 7;
     static enemyTypes = ["enemy_type_1", "type_1_upgraded", "enemy_type_2","enemy_type_3"]
     static enemyToLoadIndex = 0;
     // static enemyToLoadIndex = 2;
+
     static loadEnemies(){
         var enemy_info, enemy_info1, enemy_info2, enemy_info3;
     
         if (this.loaderCount == 1){
             enemy_info = {type: "enemy_type_1", location: 500 };
-            Enemy.createEnemy([enemy_info]);
+            this.createEnemy([enemy_info]);
         }
         if (this.loaderCount == 2){
             enemy_info = {type: "enemy_type_1", location: 300 };
             enemy_info1 = {type: "enemy_type_1", location: 700 };
-            Enemy.createEnemy([enemy_info, enemy_info1]);
+            this.createEnemy([enemy_info, enemy_info1]);
         }
         if (this.loaderCount == 3){
             enemy_info = {type: "enemy_type_1", location: 250 };
             enemy_info1 = {type: "enemy_type_1", location: 500 };
             enemy_info2 = {type: "enemy_type_1", location: 750 };
-            Enemy.createEnemy([enemy_info, enemy_info1, enemy_info2]);
+            this.createEnemy([enemy_info, enemy_info1, enemy_info2]);
         }
 
         if (this.loaderCount > 3 & this.loaderCount < 11){
@@ -240,13 +243,13 @@ class Controller{
                 enemy_info1 = {type: this.enemyTypes[this.enemyToLoadIndex], location: 400 };
                 enemy_info2 = {type: this.enemyTypes[this.enemyToLoadIndex], location: 600 };
                 enemy_info3 = {type: this.enemyTypes[this.enemyToLoadIndex], location: 800 };
-                Enemy.createEnemy([enemy_info, enemy_info1, enemy_info2, enemy_info3]);
+                this.createEnemy([enemy_info, enemy_info1, enemy_info2, enemy_info3]);
             }else{
                 enemy_info = {type: this.enemyTypes[this.enemyToLoadIndex + 1], location: 200 };
                 enemy_info1 = {type: this.enemyTypes[this.enemyToLoadIndex], location: 400 };
                 enemy_info2 = {type: this.enemyTypes[this.enemyToLoadIndex], location: 600 };
                 enemy_info3 = {type: this.enemyTypes[this.enemyToLoadIndex + 1], location: 800 };
-                Enemy.createEnemy([enemy_info, enemy_info1, enemy_info2, enemy_info3]);
+                this.createEnemy([enemy_info, enemy_info1, enemy_info2, enemy_info3]);
                 this.enemyToLoadIndex++;
             }
         }
@@ -259,18 +262,18 @@ class Controller{
 
     static check(){
 
-        if (Enemy.children.length == 0){
+        if (this.children.length == 0){
             this.loadEnemies();
         }
 
-        Enemy.enemyType2Children.forEach((child) => {
+        this.enemyType2Children.forEach((child) => {
             if((child.getElapsedTime() + 1) % 5 == 0){
                 child.object.anims.play("jump");
                 child.jump();
             }
         });
 
-        Enemy.enemyType3Children.forEach((child) => {
+        this.enemyType3Children.forEach((child) => {
             if((child.getElapsedTime() + 1) % 8 == 0){
                 child.object.anims.play("blink");
             }
@@ -278,6 +281,11 @@ class Controller{
         
     }
 
+
+
+}
+
+class Controller{
     
 }
 
@@ -290,9 +298,10 @@ function preload ()
     this.load.spritesheet('bullet', 'sprites/bullets/jet_bullets.png', { frameWidth: 32, frameHeight: 32 });
     this.load.spritesheet('enemy_bullet', 'sprites/bullets/enemy_bullet.png', { frameWidth: 30, frameHeight: 30 });
 
+    // load powerup sprites
     this.load.image('health', 'sprites/powerups/health.png');
 
-
+    // load enemy sprites
     this.load.spritesheet('enemy_type_1', 'sprites/enemies/enemy_type_1.png', { frameWidth: 23, frameHeight: 19 });
     this.load.spritesheet('type_1_upgraded', 'sprites/enemies/enemy_type_1_upgraded.png', { frameWidth: 26, frameHeight: 19 });
     this.load.spritesheet('enemy_type_2', 'sprites/enemies/enemy_type_2.png', { frameWidth: 32, frameHeight: 26 });
@@ -398,32 +407,6 @@ function create ()
     cursors = this.input.keyboard.createCursorKeys();
     keyboard = this.input.keyboard.addKeys("Q, P");
 
-    // stars = this.physics.add.group({
-    //     key: 'star',
-    //     repeat: 11,
-    //     setXY: { x: 12, y: 0, stepX: 70, stepY: 20 }
-    // });
-
-    // stars.children.iterate(function (child) {
-
-    //     child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-
-    // });
-
-    // this.physics.add.collider(stars, platforms);
-    // this.physics.add.overlap(player, stars, collectStar, null, this);
-
-    // scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
-
-
-    // bombs = this.physics.add.group();
-
-    // this.physics.add.collider(bombs, platforms);
-
-    // this.physics.add.collider(player, bombs, hitBomb, null, this);
-    // this.physics.add.collider(player, powerup, hitLife, null, this);
-    // this.physics.add.collider(enemy, bullets);
-
 }
 
 function update ()
@@ -442,22 +425,15 @@ function update ()
 
     if (paused == false){
         // console.log(count);
-        Controller.check();
+        Enemy.check();
 
     
         if (count % 50 == 0){
             player.anims.play(playerProperties.form, true);
-            // enemy_2.object.x = enemy_2.object.x  + jump;
-            // enemy_2.shoot(player.x, player.y);
             shoot();
         }
 
         if (count % 150 == 0){
-            // jump = jump * -1;
-            // enemy_2.object.x = enemy_2.object.x  + jump;
-            // if (enemy_2.health != 0){
-            //     enemy_2.shoot(player.x, player.y);
-            // } 
 
             Enemy.children.forEach((child) =>{
                 child.shoot(playerProperties.object.x, playerProperties.object.y);
@@ -465,12 +441,12 @@ function update ()
         }
     
         if (cursors.up.isDown){
-            playerProperties.form = "base_form_shooting";
+            // playerProperties.form = "base_form_shooting";
         }
-        // else if (cursors.down.isDown){
-        //     playerProperties.form = "form1_shooting";
+        else if (cursors.down.isDown){
+            // playerProperties.form = "form1_shooting";
 
-        // }
+        }
         else if (cursors.left.isDown)
         {
             player.setVelocityX(-100);
@@ -571,7 +547,6 @@ function checkBullets(){
                     if (enemy_child.health != 0){
                         enemy_child.health = enemy_child.health - 25;
                         enemy_child.tint = 0xff0000;
-                        // enemy_child.tint = "0xffc0cb";
                         enemyObject.setTint(enemy_child.tint);
                         if (enemy_child.isRed){
                             enemy_child.tint = enemy_child.tint - 0x100000;
@@ -581,7 +556,7 @@ function checkBullets(){
                     if (enemy_child.health == 0){
                         playerProperties.points = playerProperties.points + 20;
                         score.setText(`Score: ${playerProperties.points}`);
-                        explosion = explosions.create(enemyObject.x, enemyObject.y, "explosion");
+                        var explosion = explosions.create(enemyObject.x, enemyObject.y, "explosion");
                         explosion.anims.play("boom", true);
                         enemyObject.destroy();
                         Enemy.removeEnemy(enemy_child);
