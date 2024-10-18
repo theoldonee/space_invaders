@@ -1,4 +1,4 @@
-import { UserManager } from "./account.js";
+import { UserManager } from "./userManager.js";
 
 var config = {
     type: Phaser.AUTO,
