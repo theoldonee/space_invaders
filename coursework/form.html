@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form</title>
     <link rel="icon" href="website_images/jet_stage4.png">
-    <script src="js/account.js" type="module"></script>
+    <script src="js/userManager.js" type="module"></script>
     <link rel="stylesheet" href="css/template.css">
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
@@ -21,8 +21,8 @@
                 <li class="dropdown">
                     <button class="nav_button">Register/Login</button>
                     <div class="dropdown_content">
-                        <a onclick="redirect('register',false)">Register</a>
-                        <a onclick="redirect('login',false)">Login</a>
+                        <a id="register">Register</a>
+                        <a id="login">Login</a>
                     </div>
                 </li>
             </ul>
