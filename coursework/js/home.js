@@ -82,13 +82,12 @@ function showTopFive(){
     }
     else{
         var emptyRowCount;
-        emptyRowCount = 5 - sortedList.lenght;
+        emptyRowCount = 5 - sortedList.length;
 
         // checks if users exist in the sorted list
-        if(sortedList.lengh != 0){
-            for(i = 0; i < 5; i++){
+        if(sortedList.lenght != 0){
+            for(var i = 0; i < sortedList.length; i++){
                 out += userInfoRow(sortedList[i], i);
-        
             }
         }
 
