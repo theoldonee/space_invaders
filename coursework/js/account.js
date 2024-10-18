@@ -1,64 +1,52 @@
-export {
-    UserManager
+import { UserManager } from "./userManager.js";
+
+window.onload = function (){
+    const email = window.location.search.split("?")[1];
+    if (!email){
+        alert("Only users can view accounts");
+    }
+    else{
+        if (UserManager.isUser(email)){
+            var user = UserManager.getUser(email);
+            displayAccountInfo(user);
+        }else{
+            alert("Only registered users can view account");
+        }
+       
+    }
 };
 
-// localStorage.removeItem("registeredUsers");
-class UserManager{
 
-    static userEmail;
-    // static registeredUsers = this.getAllUsers();
+function displayAccountInfo(user){
+    var userRank = UserManager.getRank(user.email);
+    var image_to_display;
 
-    static setUser(email){
-        this.userEmail = email;
+    if (userRank == 1){
+        image_to_display = "jet_stage4";
+    }else if (userRank == 2){
+        image_to_display = "jet_stage3";
+    }else if (userRank == 3){
+        image_to_display = "jet_stage2";
+    }else{
+        image_to_display = "jet_stage1";
     }
 
-    static getAllUsers(){
-        if (localStorage.registeredUsers){
-            return JSON.parse(localStorage.registeredUsers);
-        }
-        return []
-    }
+    document.getElementById("rank_img").innerHTML = `
+         <img src="website_images/${image_to_display}.png" alt="Jet Image">
+    `;
 
-    static updateRegisteredUsers(userList){
-        alert("Updating users");
-        localStorage.setItem("registeredUsers", JSON.stringify(userList));
-    }
+    document.getElementById("rank_position").innerHTML = userRank;
 
-    // static createRegisteredUsers(){
-    //     localStorage.setItem("registeredUsers", JSON.stringify([]));
-    // }
+    document.querySelector("#user_info > div").innerHTML = `
+        <p><b><u>Name</u></b>: ${user.username}</p>
+        <p><b><u>DOB</u></b>: ${user.DOB }</p>
+        <p><b><u>Gender</u></b>: ${user.gender}</p>
+    `
+    
+    document.getElementById("highscore").innerHTML = user.highscore;
+    document.getElementById("playtime").innerHTML = user.playTime;
+    document.getElementById("bulletsfired").innerHTML = user.bulletsFired;
+    document.getElementById("enemieskilled").innerHTML = user.enemiesKilled;
 
-    // returns true user exist
-    static isUser(email){
-        var registeredUsers = this.getAllUsers();
-        for (var index = 0; index < registeredUsers.length; index++){
-            var user0bj = registeredUsers[index];
-            // checks if user exist
-            if (user0bj.email == email){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    static getUser(email){
-        var registeredUsers = this.getAllUsers();
-        for (var index = 0; index < registeredUsers.length; index++){
-            var user0bj = registeredUsers[index];
-            // checks if user exist
-            if (user0bj.email == email){
-                return user0bj;
-            }
-        }
-    }
-
-    static isEmail(email){
-        var length = email.split("@").length;
-
-        if (length == 2){
-            return true;
-        }
-        return false;
-    }
 
 }

@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game</title>
+    <title>Account</title>
     <link rel="icon" href="website_images/jet_stage4.png">
-    <script src="js/games.js"></script>
+    <script src="js/account.js" type="module"></script>
+    <script src="js/userManager.js" type="module"></script>
     <link rel="stylesheet" href="css/template.css">
     <link rel="stylesheet" href="css/account.css">
 </head>
@@ -18,23 +19,82 @@
                 <li class="dropdown">
                     <button class="nav_button">Account</button>
                     <div class="dropdown_content">
-                        <a href="account.html">Account Info</a>
                         <a onclick="redirect('login',false)">Logout</a>
                     </div>
                 </li>
             </ul>
         </nav>
     </header>
-    <section id="section1">
-        <div></div>
-    </section>
-    <section id="section2">
-        <div></div>
-        <div>
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
+    <section id="section">
+        <div id="info_div">
+            <div id="user_info_div">
+                <div id="rank_info_div">
+                    <h1>Rank</h1>
+                    <div id="rank_info">
+                        <div id="rank_img">
+                            <img src="website_images/jet_stage4.png" alt="Jet Image">
+                        </div>
+                        <div>
+                            <p id="rank_position">_ _</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="user_info">
+                    <h1>My Profile</h1>
+                    <div>
+                        <p><b><u>Name</u></b>: _ _</p>
+                        <p><b><u>DOB</u></b>: _ _</p>
+                        <p><b><u>Gender</u></b>: _ _</p>
+                    </div>
+                </div>
+            </div>
+            <div id="user_accomplishments">
+                <div class="accomplishment">
+                    <div class="accomplishment_title">
+                        <h2>Highest Score</h2>
+                        <div class="img_div">
+                            <img src="website_images/jet_stage4.png" alt="jet_stage4">
+                        </div>
+                    </div>
+                    <div class="accomplishment_info">
+                        <h1 id="highscore">_ _</h1>
+                    </div>
+                </div>
+                <div class="accomplishment">
+                    <div class="accomplishment_title">
+                        <h2>Play Time</h2>
+                        <div class="img_div">
+                            <img src="website_images/clock.gif" alt="clock">
+                        </div>
+                    </div>
+                    <div class="accomplishment_info">
+                        <h1 id="playtime">_ _</h1>
+                    </div>
+                </div>
+                <div class="accomplishment">
+                    <div class="accomplishment_title">
+                        <h2>Bullets Fired</h2>
+                        <div class="img_div">
+                            <img src="website_images/Bullet.gif" alt="bullet">
+                        </div>
+                    </div>
+                    <div class="accomplishment_info">
+                        <h1 id="bulletsfired">_ _</h1>
+                    </div>
+                </div>
+                <div class="accomplishment">
+                    <div class="accomplishment_title">
+                        <h2>Enemies Killed</h2>
+                        <div class="img_div">
+                            <img src="website_images/enemy_type_2.gif" alt="enemy">
+                        </div>
+                    </div>
+                    <div class="accomplishment_info">
+                        <h1 id="enemieskilled">_ _</h1>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
     <footer>
