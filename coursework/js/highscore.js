@@ -13,11 +13,11 @@ var tableList = [];
 var sortedList = [];
 var tableBody = document.getElementById("table_body");
 function showHighscores(){
-    sort();
+    sortTable();
 }
 
 
-function sort(){
+function sortTable(){
     var out = '';
     var tableRow = '';
     var sort_by = document.getElementById("sort_by").value;
@@ -66,9 +66,9 @@ function sort(){
                 </td>
                 <td>${sortedList[i].username}</td>
                 <td>${sortedList[i].highscore}</td>
-                <td>${sortedList[i].playtime}</td>
+                <td>${sortedList[i].playTime}</td>
                 <td>${sortedList[i].enemiesKilled}</td>
-                <td>${sortedList[i].bulletsfired}</td>
+                <td>${sortedList[i].bulletsFired}</td>
             </tr>
         `;
         out += tableRow;
@@ -77,4 +77,4 @@ function sort(){
     tableBody.innerHTML = out;
 }
 
-sort();
+sortTable();
