@@ -1,4 +1,4 @@
-import { UserManager } from "./account.js";
+import { UserManager } from "./userManager.js";
 
 if (typeof(Storage) == "undefined") {
     alert("Sorry! No Web Storage support..");
@@ -27,6 +27,13 @@ window.onload = function (){
     }else{
         registeredUsers = [];
     }
+    document.getElementById("register").addEventListener("click", ()=> {
+        redirect('register',false);
+    });
+
+    document.getElementById("login").addEventListener("click", ()=> {
+        redirect('login',false);
+    });
 
     document.getElementById("submit").addEventListener("click", () => {
         checkValues();
@@ -124,12 +131,12 @@ function createUser(){
         username: userName,
         password: password,
         email: email,
-        logged_in: true,
-        rank: Math.floor(Math.random() * 10),
+        DOB: dob,
+        gender: gender,
         highscore: Math.floor(Math.random() * 1000),
         enemiesKilled: Math.floor(Math.random() * 1000),
-        playtime: Math.floor(Math.random() * 1000),
-        bulletsfired: Math.floor(Math.random() * 2000),
+        playTime: Math.floor(Math.random() * 1000),
+        bulletsFired: Math.floor(Math.random() * 2000),
     };
 
     registeredUsers.push(user);
