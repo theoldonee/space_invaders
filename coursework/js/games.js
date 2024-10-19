@@ -36,16 +36,8 @@ window.onload = function (){
        
     }
 };
-
-
-
-var score = 0;;
-var frameRate = 5;
-var count = 0;
-var paused = false;
-var contactHealth = false;
 var healthPowerup;
-var player, bullets, explosions, cursors, keyboard;
+var player, bullets, explosions, cursors, keyboard, score;
 
 const playerProperties = {
     health: 400,
@@ -86,19 +78,21 @@ class Enemy{
         this.redCount = 0;
         this.form = 'normal';
         this.createdTime = new Date();
-        Enemy.checkType(this);
+        Enemy.setHealth(this);
         Enemy.addEnemy(this);
     }
 
+    // sets physics class for enemy class use
     static setPhysics(classClass){
         this.physics = classClass;
     }
 
+    // sets tweens class for enemy class use
     static setTweens(classClass){
         this.tweens = classClass;
     }
     
-
+    // adds enemy to list
     static addEnemy(enemyObject) {
         this.children.push(enemyObject);
         if (enemyObject.type == "enemy_type_1"){
@@ -118,13 +112,14 @@ class Enemy{
         }
     }
 
+    // creates enemy object
     static createEnemy(enemiesToCreate){
         for (var type of enemiesToCreate){
-            var enemy;
-            enemy = new Enemy(type.type, type.location);
+            var enemy = new Enemy(type.type, type.location);
         }
     }
 
+    // removes enemy from array
     static removeEnemy(enemyObject) {
         var indexInChildren = this.children.indexOf(enemyObject);
         this.children.splice(indexInChildren, 1);  
@@ -149,17 +144,18 @@ class Enemy{
         }
     }
 
+    // checks if an enemy object is in an array
     static isInArray(enemyObject, array){
         for(var i = 0; i < array.length; i++){
             if( array[i] == enemyObject){
                 return true;
             }
         }
-
         return false;
     }
 
-    static checkType(enemyObject){
+    // sets enemy health based on type
+    static setHealth(enemyObject){
         if (enemyObject.type == "enemy_type_1"){
             enemyObject.health = 50;
         }
@@ -174,17 +170,20 @@ class Enemy{
         }
     }
 
-    static setBulletVelocity(playerX, playerY, bullet_object){
-        var seconds = 9;
-        var velX = (playerX - bullet_object.x)/seconds;
-        var velY = (playerY - bullet_object.y)/seconds;
+    // determines the velocity of each pullet
+    static setBulletVelocity(playerX, playerY, bullet_object, seconds){
+        var velX = (playerX - bullet_object.x)/seconds; // calculation for velocity in x direction
+        var velY = (playerY - bullet_object.y)/seconds; // calculation for velocity in y direction
 
         bullet_object.setVelocityX(velX);
         bullet_object.setVelocityY(velY);
     }
     
+    // shoots bullet in player direction
     shoot(x, y) {
         var enemyBullet;
+
+        // checks enemy type to determine where bullet should spawn
         if (this.type == "enemy_type_1") {
             enemyBullet = Enemy.physics.add.sprite(this.object.x + 4, this.object.y + 10,"enemy_bullet").setScale(0.5);
             Enemy.bullet.push(enemyBullet);
@@ -193,14 +192,16 @@ class Enemy{
             Enemy.bullet.push(enemyBullet);
         }
 
-        Enemy.setBulletVelocity(x, y, enemyBullet);
-    }
+        Enemy.setBulletVelocity(x, y, enemyBullet, 5);
+    } 
 
+    // retuns the lenght of time an enemy has been on screen
     getElapsedTime() {
         const now = new Date();
         return Math.floor((now - this.createdTime) / 1150);  // Return time in seconds
     }
 
+    // Makes enemy jump to random location
     jump(){
         var location = Math.floor(Math.random() * 800);
 
@@ -217,9 +218,11 @@ class Enemy{
     static enemyToLoadIndex = 0;
     // static enemyToLoadIndex = 2;
 
+    // displays enemy on screen
     static loadEnemies(){
         var enemy_info, enemy_info1, enemy_info2, enemy_info3;
-    
+        
+        // loads enemy based off load count
         if (this.loaderCount == 1){
             enemy_info = {type: "enemy_type_1", location: 500 };
             this.createEnemy([enemy_info]);
@@ -254,18 +257,22 @@ class Enemy{
             }
         }
 
+        // increments count when count less than 11
         if (this.loaderCount < 11){
             this.loaderCount++;
         }
         
     }
 
+
     static check(){
 
+        // loads enemies if enemy list is empty
         if (this.children.length == 0){
             this.loadEnemies();
         }
 
+        // makes type 2 enemies jump every 5 seconds.
         this.enemyType2Children.forEach((child) => {
             if((child.getElapsedTime() + 1) % 5 == 0){
                 child.object.anims.play("jump");
@@ -273,6 +280,7 @@ class Enemy{
             }
         });
 
+        // makes type 3 enemies blink every 8 seconds.
         this.enemyType3Children.forEach((child) => {
             if((child.getElapsedTime() + 1) % 8 == 0){
                 child.object.anims.play("blink");
@@ -281,13 +289,13 @@ class Enemy{
         
     }
 
-
-
 }
 
 class Controller{
+    static frameRate = 5;
+    static count = 0;
     static start;
-
+    static contactHealth;
     static paused = false;
     static getTimeElapsed(start){
         return Math.floor( (new Date() - start) / 1150);
@@ -302,7 +310,170 @@ class Controller{
     }
 
     static initializeStart(){
-          
+          this.start = new Date();
+    }
+
+    // Checks if an explosion is displayed
+    static checkExplosion(){
+        explosions.children.iterate(function (child){
+            if (child){
+                child.on(Phaser.Animations.Events.ANIMATION_COMPLETE, function (anim, frame, gameObject) {
+
+                    this.disableBody(true, true);
+            
+                });
+            }
+        });
+    }
+
+    // Checks if player is in contact with a powerup
+    static checkPowerups(){
+        if (this.contactHealth){
+
+            healthPowerup.setX(1000);
+            healthPowerup.destroy(true); 
+
+            // make health stop only when flicker complete
+            if (playerProperties.flickerCount > playerProperties.flickerStop){
+                this.contactHealth = false;
+            }
+            else{
+
+                this.flicker(playerProperties, 'green');
+            }  
+            
+        }
+    }
+
+    // checks all bullets fired
+    static checkBullets(){
+        bullets.children.iterate(function (child) {
+            // checks if a child exist
+            if (child){
+                // checks if bullet is no more on screen
+                if (child.y < 0){
+                    child.destroy(); // destroys bullet         
+                }
+    
+                Enemy.children.forEach((enemy_child) => {
+                    var enemyObject = enemy_child.object
+
+                    // chceks if bullet is in contact with an enemy
+                    if ((((enemyObject.x + 25) >= child.x) && ((enemyObject.x - 25) <= child.x)) && (child.y == enemyObject.y)){
+                        child.destroy(); // destroys bullet
+
+                        // checks if enemy health is above zero
+                        if (enemy_child.health != 0){
+                            enemy_child.health = enemy_child.health - 25;
+                            enemy_child.tint = 0xff0000;
+                            enemyObject.setTint(enemy_child.tint);
+                            if (enemy_child.isRed){
+                                enemy_child.tint = enemy_child.tint - 0x100000;
+                                enemyObject.setTint(enemy_child.tint);
+                            }
+                        }else{
+                            playerProperties.points += 20;
+                            playerProperties.enemiesKilled += 1;
+                            score.setText(`Score: ${playerProperties.points}`);
+                            var explosion = explosions.create(enemyObject.x, enemyObject.y, "explosion");
+                            explosion.anims.play("boom", true); // plays explosion animation
+                            enemyObject.destroy(); // removes enemy from screen
+                            Enemy.removeEnemy(enemy_child);
+                        }
+                    }
+                });
+            }
+            
+        });
+    
+        
+        Enemy.bullet.forEach((bullet_child) => {
+            var index;
+            index = Enemy.bullet.indexOf(bullet_child);
+            // checks if enemy bullet is no more on screen
+            if (bullet_child.y > 800){   
+                bullet_child.destroy();  
+                Enemy.bullet.splice(index, 1);           
+            }
+    
+            if ((( player.x - 20 <= bullet_child.x) && (player.x + 20 >= bullet_child.x)) && 
+                (( bullet_child.y >=  player.y ) && (bullet_child.y <  player.y + 20))){
+                    bullet_child.destroy();
+                    Enemy.bullet.splice(index, 1);
+                    playerProperties.isRed = true;
+                    this.flicker(playerProperties, "red");
+    
+            }
+        
+        }); 
+    
+    }
+    
+    // Function that flickers player
+    static flicker(objectToFlicker, flickerColor){
+
+        var color ;
+        var functionCount = 40;
+
+        // checks if player colour is green
+        if (flickerColor == "green"){
+            color = 0x00ff00;
+            if(objectToFlicker.greenCount < functionCount){
+                objectToFlicker.object.setTint(color);
+                objectToFlicker.greenCount++;
+            }
+            else if((objectToFlicker.greenCount >= functionCount) && (playerProperties.greenCount <= 100)){
+                objectToFlicker.object.clearTint();
+                objectToFlicker.greenCount++;
+            }
+            else{
+                objectToFlicker.greenCount = 0;
+                objectToFlicker.flickerCount++;
+                objectToFlicker.object.clearTint();
+            }
+        }
+
+        // checks if player colour is red
+        if (flickerColor == "red"){
+            color = 0xff0000;
+            if(objectToFlicker.redCount < functionCount){
+                // objectToFlicker.isRed = true;
+                objectToFlicker.object.setTint(color);
+                objectToFlicker.redCount++;
+            }
+            else{
+                objectToFlicker.isRed = false;
+                objectToFlicker.redCount = 0;
+                objectToFlicker.object.clearTint();
+            }
+        }
+
+    }
+
+    static bulletsToFire(stageCheck){
+
+        if(stageCheck[0]){
+            playerProperties.bulletsFired += 1;
+            bullets.create(player.x, player.y - 40, "bullet").setScale(0.5);
+        }
+        
+        if(stageCheck[1]){
+            playerProperties.bulletsFired += 2;
+            bullets.create(player.x + 10, player.y - 20, "bullet").setScale(0.5);
+            bullets.create(player.x - 10, player.y - 20, "bullet").setScale(0.5);
+        }
+        
+        if(stageCheck[2]){
+            playerProperties.bulletsFired += 2;
+            bullets.create(player.x + 20, player.y - 20, "bullet").setScale(0.5);
+            bullets.create(player.x - 20, player.y - 20, "bullet").setScale(0.5);
+        }
+        
+        if(stageCheck[3]){
+            playerProperties.bulletsFired += 2;
+            bullets.create(player.x + 30, player.y - 10, "bullet").setScale(0.5);
+            bullets.create(player.x - 30, player.y - 10, "bullet").setScale(0.5);
+        }
     }
 
 }
@@ -329,7 +500,6 @@ function preload ()
 
 function create ()
 {
-
     Enemy.setPhysics(this.physics);
     Enemy.setTweens(this.tweens);
     
@@ -344,27 +514,27 @@ function create ()
     this.anims.create({
         key: "boom",
         frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 3 }),
-        frameRate: frameRate,
+        frameRate: Controller.frameRate,
         repeat: 0
     });
 
     this.anims.create({
             key: "base_form_shooting",
             frames: this.anims.generateFrameNumbers('jet', { start: 0, end: 1 }),
-            frameRate: frameRate,
+            frameRate: Controller.frameRate,
             repeat: -1
     });
 
     this.anims.create({
         key: "base_form",
         frames: this.anims.generateFrameNumbers('jet', { start: 0, end: 0 }),
-        frameRate: frameRate,
+        frameRate: Controller.frameRate,
         repeat: -1
     });
     this.anims.create({
         key: "form1",
         frames: this.anims.generateFrameNumbers('jet', { start: 2, end: 2 }),
-        frameRate: frameRate,
+        frameRate: Controller.frameRate,
         repeat: -1
     });
 
@@ -372,7 +542,7 @@ function create ()
     this.anims.create({
         key: "form1_shooting",
         frames: this.anims.generateFrameNumbers('jet', { start: 2, end: 3 }),
-        frameRate: frameRate,
+        frameRate: Controller.frameRate,
         repeat: -1
     });
 
@@ -380,7 +550,7 @@ function create ()
     this.anims.create({
         key: "form2_shooting",
         frames: this.anims.generateFrameNumbers('jet', { start: 4, end: 5 }),
-        frameRate: frameRate,
+        frameRate: Controller.frameRate,
         repeat: -1
     });
 
@@ -388,14 +558,14 @@ function create ()
     this.anims.create({
         key: "form3",
         frames: this.anims.generateFrameNumbers('jet', { start: 6, end: 6 }),
-        frameRate: frameRate,
+        frameRate: Controller.frameRate,
         repeat: -1
     });
 
     this.anims.create({
         key: "form3_shooting",
         frames: this.anims.generateFrameNumbers('jet', { start: 6, end: 7 }),
-        frameRate: frameRate,
+        frameRate: Controller.frameRate,
         repeat: -1
     });
 
@@ -403,14 +573,14 @@ function create ()
     this.anims.create({
         key: "jump",
         frames: this.anims.generateFrameNumbers('enemy_type_2', { start: 1, end: 3 }),
-        frameRate: frameRate,
+        frameRate: Controller.frameRate,
         repeat: 2
     });
 
     this.anims.create({
         key: "blink",
         frames: this.anims.generateFrameNumbers('enemy_type_3', { start: 0, end: 6 }),
-        frameRate: frameRate,
+        frameRate: Controller.frameRate,
         repeat: 1
     });
 
@@ -422,6 +592,11 @@ function create ()
         font: "25px Montserrat",
         fill: "#ffffff",
     });
+
+    // pause = this.add.text(50, 10, `Score: ${playerProperties.points}`, {
+    //     font: "25px Montserrat",
+    //     fill: "#ffffff",
+    // });
 
 
     cursors = this.input.keyboard.createCursorKeys();
@@ -451,12 +626,12 @@ function update ()
     if (!(Controller.paused)){
         Enemy.check();
         
-        if (count % 50 == 0){
+        if (Controller.count % 50 == 0){
             player.anims.play(playerProperties.form, true);
             shoot();
         }
 
-        if (count % 150 == 0){
+        if (Controller.count % 75 == 0){
 
             Enemy.children.forEach((child) =>{
                 child.shoot(playerProperties.object.x, playerProperties.object.y);
@@ -467,231 +642,64 @@ function update ()
             playerProperties.form = "base_form_shooting";
         }
         else if (cursors.down.isDown){
-            playerProperties.form = "form1_shooting";
-
+            playerProperties.form = "form3_shooting";
         }
         else if (cursors.left.isDown)
         {
             player.setVelocityX(-100);
-            playerProperties.form = "form2_shooting";
         }
         else if (cursors.right.isDown)
         {
             player.setVelocityX(100);
-            playerProperties.form = "form3_shooting";
+        
         }
         else{
             player.setVelocityX(0);
         }
-        count++;
-        
-        // if(count > 1000){
-        //     Enemy.children[0].object.anims.play('jump', true);
-        // }
+
+        Controller.count++;
     
-        checkBullets();
+        Controller.checkBullets();
         if (playerProperties.isRed){
-            flicker(playerProperties, "red");
+            Controller.flicker(playerProperties, "red");
         }
     
         if ((( player.x - 20 <= healthPowerup.x) && (player.x + 20 >= healthPowerup.x)) && 
         (( healthPowerup.y >=  player.y - 20 ) && (healthPowerup.y <  player.y + 20))){
-            contactHealth = true;
+            Controller.contactHealth = true;
     
         }
     
-        checkPowerups();
+        Controller.checkPowerups();
     
-        if (count == 1350){
-            count = 0;
+        if (Controller.count == 1350){
+            Controller.count = 0;
         }
-        checkExplosion();
+        Controller.checkExplosion();
 
     }
     
 }
-
-
-function bulletsToFire(stageCheck){
-
-    if(stageCheck[0]){
-        playerProperties.bulletsFired += 1;
-        bullets.create(player.x, player.y - 40, "bullet").setScale(0.5);
-    }
-    
-    if(stageCheck[1]){
-        playerProperties.bulletsFired += 2;
-        bullets.create(player.x + 10, player.y - 20, "bullet").setScale(0.5);
-        bullets.create(player.x - 10, player.y - 20, "bullet").setScale(0.5);
-    }
-    
-    if(stageCheck[2]){
-        playerProperties.bulletsFired += 2;
-        bullets.create(player.x + 20, player.y - 20, "bullet").setScale(0.5);
-        bullets.create(player.x - 20, player.y - 20, "bullet").setScale(0.5);
-    }
-    
-    if(stageCheck[3]){
-        playerProperties.bulletsFired += 2;
-        bullets.create(player.x + 30, player.y - 10, "bullet").setScale(0.5);
-        bullets.create(player.x - 30, player.y - 10, "bullet").setScale(0.5);
-    }
-}
-
 
 function shoot(){
     if (playerProperties.form == "base_form_shooting"){
-        bulletsToFire([true,false,false,false]);
+        Controller.bulletsToFire([true,false,false,false]);
     }
     if (playerProperties.form == "form1_shooting"){
-        bulletsToFire([true,true,false,false]);
+        Controller.bulletsToFire([true,true,false,false]);
     }
     if (playerProperties.form == "form2_shooting"){
         
-        bulletsToFire([true,true,true,false]);
+        Controller.bulletsToFire([true,true,true,false]);
     }
     if (playerProperties.form == "form3_shooting"){
-        bulletsToFire([true,true,true,true]);
+        Controller.bulletsToFire([true,true,true,true]);
     }
 
     bullets.children.iterate(function (child) {
         child.setVelocityY(-300);
     });
     
-}
-
-
-function checkBullets(){
-    bullets.children.iterate(function (child) {
-        if (child){
-            if (child.y < 0){
-                child.destroy();             
-            }
-
-            Enemy.children.forEach((enemy_child) => {
-                var enemyObject = enemy_child.object
-                if ((((enemyObject.x + 25) >= child.x) && ((enemyObject.x - 25) <= child.x)) && (child.y == enemyObject.y)){
-                    child.destroy();
-                    if (enemy_child.health != 0){
-                        enemy_child.health = enemy_child.health - 25;
-                        enemy_child.tint = 0xff0000;
-                        enemyObject.setTint(enemy_child.tint);
-                        if (enemy_child.isRed){
-                            enemy_child.tint = enemy_child.tint - 0x100000;
-                            enemyObject.setTint(enemy_child.tint);
-                        }
-                    }
-                    if (enemy_child.health == 0){
-                        playerProperties.points += 20;
-                        playerProperties.enemiesKilled += 1;
-                        score.setText(`Score: ${playerProperties.points}`);
-                        var explosion = explosions.create(enemyObject.x, enemyObject.y, "explosion");
-                        explosion.anims.play("boom", true);
-                        enemyObject.destroy();
-                        Enemy.removeEnemy(enemy_child);
-                    }
-    
-                }
-            });
-        }
-        
-    });
-
-    
-    Enemy.bullet.forEach( (bullet_child) => {
-        var index;
-        // alert(this);
-        index = Enemy.bullet.indexOf(bullet_child);
-        if (bullet_child.y > 800){   
-            bullet_child.destroy();  
-            Enemy.bullet.splice(index, 1);           
-        }
-
-        if ((( player.x - 20 <= bullet_child.x) && (player.x + 20 >= bullet_child.x)) && 
-            (( bullet_child.y >=  player.y ) && (bullet_child.y <  player.y + 20))){
-                bullet_child.destroy();
-                Enemy.bullet.splice(index, 1);
-                playerProperties.isRed = true;
-                flicker(playerProperties, "red");
-
-        }
-    
-    }); 
-
-}
-
-// Checks if an explosion is displayed
-function checkExplosion(){
-    explosions.children.iterate(function (child){
-        if (child){
-            child.on(Phaser.Animations.Events.ANIMATION_COMPLETE, function (anim, frame, gameObject) {
-
-                this.disableBody(true, true);
-        
-            });
-        }
-    });
-}
-
-// Checks if player is in contact with a powerup
-function checkPowerups(){
-    if (contactHealth){
-
-        healthPowerup.setX(1000);
-        healthPowerup.destroy(true); 
-
-        // make health stop only when flicker complete
-        if (playerProperties.flickerCount > playerProperties.flickerStop){
-            contactHealth = false;
-        }
-        else{
-
-            flicker(playerProperties, 'green');
-        }  
-        
-    }
-
-}
-
-// Function that flickers player
-function flicker(objectToFlicker, flickerColor){
-
-    var color ;
-    var functionCount = 40;
-
-    // checks if player colour is green
-    if (flickerColor == "green"){
-        color = 0x00ff00;
-        if(objectToFlicker.greenCount < functionCount){
-            objectToFlicker.object.setTint(color);
-            objectToFlicker.greenCount++;
-        }
-        else if((objectToFlicker.greenCount >= functionCount) && (playerProperties.greenCount <= 100)){
-            objectToFlicker.object.clearTint();
-            objectToFlicker.greenCount++;
-        }
-        else{
-            objectToFlicker.greenCount = 0;
-            objectToFlicker.flickerCount++;
-            objectToFlicker.object.clearTint();
-        }
-    }
-
-    // checks if player colour is red
-    if (flickerColor == "red"){
-        color = 0xff0000;
-        if(objectToFlicker.redCount < functionCount){
-            // objectToFlicker.isRed = true;
-            objectToFlicker.object.setTint(color);
-            objectToFlicker.redCount++;
-        }
-        else{
-            objectToFlicker.isRed = false;
-            objectToFlicker.redCount = 0;
-            objectToFlicker.object.clearTint();
-        }
-    }
-
 }
 
 function redirect(display_content){
