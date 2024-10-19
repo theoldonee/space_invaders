@@ -37,10 +37,11 @@ window.onload = function (){
     }
 };
 var healthPowerup;
-var player, bullets, explosions, cursors, keyboard, score;
+var player, bullets, explosions, cursors, keyboard, score
+var jet_explosion;
 
 const playerProperties = {
-    health: 400,
+    health: 200,
     isGreen: false,
     isRed: false,
     flickerCount: 0,
@@ -292,11 +293,13 @@ class Enemy{
 }
 
 class Controller{
-    static frameRate = 5;
+    static frameRate = 5; // frame rate of animations
     static count = 0;
     static start;
     static contactHealth;
     static paused = false;
+    static physics;
+    static flag = true;
     static getTimeElapsed(start){
         return Math.floor( (new Date() - start) / 1150);
     }
@@ -311,6 +314,11 @@ class Controller{
 
     static initializeStart(){
           this.start = new Date();
+    }
+
+    // sets physics class for enemy class use
+    static setPhysics(classClass){
+        this.physics = classClass;
     }
 
     // Checks if an explosion is displayed
@@ -385,7 +393,6 @@ class Controller{
             }
             
         });
-    
         
         Enemy.bullet.forEach((bullet_child) => {
             var index;
@@ -395,12 +402,15 @@ class Controller{
                 bullet_child.destroy();  
                 Enemy.bullet.splice(index, 1);           
             }
-    
+            
+
+            // checks if enemy bullet in contact with player
             if ((( player.x - 20 <= bullet_child.x) && (player.x + 20 >= bullet_child.x)) && 
                 (( bullet_child.y >=  player.y ) && (bullet_child.y <  player.y + 20))){
                     bullet_child.destroy();
                     Enemy.bullet.splice(index, 1);
                     playerProperties.isRed = true;
+                    playerProperties.health -= 25;
                     this.flicker(playerProperties, "red");
     
             }
@@ -450,6 +460,7 @@ class Controller{
 
     }
 
+    // determines which set of bullets to fire
     static bulletsToFire(stageCheck){
 
         if(stageCheck[0]){
@@ -476,6 +487,24 @@ class Controller{
         }
     }
 
+    static playerDead(classRef){
+        if(this.flag){
+            player.destroy();
+            // var x = player.x;
+            this.flag = false;
+            var jet_explosion = this.physics.add.sprite(player.x, player.y + 10, "jet_explosion").setScale(3);
+            jet_explosion.anims.play("jet_boom", true);
+
+            jet_explosion.on(Phaser.Animations.Events.ANIMATION_COMPLETE, function () {
+                Controller.pauseGame();
+                this.add.text(180, 300, `GAME OVER`, {
+                    font: "100px Montserrat",
+                    fill: "#ffffff",
+                });
+            }, classRef);
+        }
+    }
+
 }
 
 function preload ()
@@ -484,6 +513,7 @@ function preload ()
     this.load.spritesheet('jet', 'sprites/jet.png', { frameWidth: 70, frameHeight: 46 });
     
     this.load.spritesheet('explosion', 'sprites/explosion.png', { frameWidth: 32, frameHeight: 32 });
+    this.load.spritesheet('jet_explosion', 'sprites/jet_explosion.png', { frameWidth: 32, frameHeight: 32 });
     this.load.spritesheet('bullet', 'sprites/bullets/jet_bullets.png', { frameWidth: 32, frameHeight: 32 });
     this.load.spritesheet('enemy_bullet', 'sprites/bullets/enemy_bullet.png', { frameWidth: 30, frameHeight: 30 });
 
@@ -502,7 +532,8 @@ function create ()
 {
     Enemy.setPhysics(this.physics);
     Enemy.setTweens(this.tweens);
-    
+
+    Controller.setPhysics(this.physics);
     player = this.physics.add.sprite(500, 700, "jet").setScale(1.5);
     playerProperties.object = player;
     playerProperties.playTimeStart = new Date();
@@ -514,6 +545,13 @@ function create ()
     this.anims.create({
         key: "boom",
         frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 3 }),
+        frameRate: Controller.frameRate,
+        repeat: 0
+    });
+
+    this.anims.create({
+        key: "jet_boom",
+        frames: this.anims.generateFrameNumbers('jet_explosion', { start: 0, end: 4 }),
         frameRate: Controller.frameRate,
         repeat: 0
     });
@@ -627,8 +665,13 @@ function update ()
         Enemy.check();
         
         if (Controller.count % 50 == 0){
-            player.anims.play(playerProperties.form, true);
-            shoot();
+            if (playerProperties.form != "base_form"){
+                
+                shoot();
+            }else{
+                player.anims.play(playerProperties.form, true);
+            }
+            
         }
 
         if (Controller.count % 75 == 0){
@@ -638,23 +681,25 @@ function update ()
             });
         }
     
-        if (cursors.up.isDown){
-            playerProperties.form = "base_form_shooting";
-        }
-        else if (cursors.down.isDown){
-            playerProperties.form = "form3_shooting";
-        }
-        else if (cursors.left.isDown)
-        {
-            player.setVelocityX(-100);
-        }
-        else if (cursors.right.isDown)
-        {
-            player.setVelocityX(100);
-        
-        }
-        else{
-            player.setVelocityX(0);
+        if(Controller.flag){
+            if (cursors.up.isDown){
+                playerProperties.form = "base_form_shooting";
+            }
+            else if (cursors.down.isDown){
+                playerProperties.form = "form3_shooting";
+            }
+            else if (cursors.left.isDown)
+            {
+                player.setVelocityX(-100);
+            }
+            else if (cursors.right.isDown)
+            {
+                player.setVelocityX(100);
+            
+            }
+            else{
+                player.setVelocityX(0);
+            }
         }
 
         Controller.count++;
@@ -663,7 +708,10 @@ function update ()
         if (playerProperties.isRed){
             Controller.flicker(playerProperties, "red");
         }
-    
+        
+        if(playerProperties.health < 1){
+            Controller.playerDead(this);
+        }
         if ((( player.x - 20 <= healthPowerup.x) && (player.x + 20 >= healthPowerup.x)) && 
         (( healthPowerup.y >=  player.y - 20 ) && (healthPowerup.y <  player.y + 20))){
             Controller.contactHealth = true;
@@ -698,8 +746,7 @@ function shoot(){
 
     bullets.children.iterate(function (child) {
         child.setVelocityY(-300);
-    });
-    
+    });  
 }
 
 function redirect(display_content){
