@@ -47,7 +47,7 @@ var contactHealth = false;
 var healthPowerup;
 var player, bullets, explosions, cursors, keyboard;
 
-var playerProperties = {
+const playerProperties = {
     health: 400,
     isGreen: false,
     isRed: false,
@@ -59,7 +59,7 @@ var playerProperties = {
     points: 0,
     enemiesKilled: 0,
     bulletsFired: 0,
-    currentPlayTime: 0,
+    playTimePased: 0,
 }
 
 class Enemy{
@@ -286,7 +286,25 @@ class Enemy{
 }
 
 class Controller{
-    
+    static start;
+
+    static paused = false;
+    static getTimeElapsed(start){
+        return Math.floor( (new Date() - start) / 1150);
+    }
+
+    static pauseGame(){
+        this.paused = true;
+    }
+
+    static startGame(){
+        this.paused = false;
+    }
+
+    static initializeStart(){
+          
+    }
+
 }
 
 function preload ()
@@ -311,11 +329,13 @@ function preload ()
 
 function create ()
 {
+
     Enemy.setPhysics(this.physics);
     Enemy.setTweens(this.tweens);
     
     player = this.physics.add.sprite(500, 700, "jet").setScale(1.5);
     playerProperties.object = player;
+    playerProperties.playTimeStart = new Date();
 
     healthPowerup = this.physics.add.sprite(500, 300, 'health');
     player.setCollideWorldBounds(true);
@@ -411,23 +431,26 @@ function create ()
 
 function update ()
 {
-    if (keyboard.Q.isDown && paused == false){
+    if(keyboard.Q.isDown ){
+        Controller.pauseGame();
+    }
+
+    if(keyboard.P.isDown ){
+        Controller.startGame();
+    }
+
+    if (Controller.paused){
         this.physics.pause();
         this.anims.pauseAll();
         this.tweens.pauseAll();
-        paused = true;
-    }
-    else if (keyboard.P.isDown && paused == true){
+    }else{
         this.physics.resume();
         this.anims.resumeAll();
-        paused = false;
     }
 
-    if (paused == false){
-        // console.log(count);
+    if (!(Controller.paused)){
         Enemy.check();
-
-    
+        
         if (count % 50 == 0){
             player.anims.play(playerProperties.form, true);
             shoot();
@@ -441,21 +464,21 @@ function update ()
         }
     
         if (cursors.up.isDown){
-            // playerProperties.form = "base_form_shooting";
+            playerProperties.form = "base_form_shooting";
         }
         else if (cursors.down.isDown){
-            // playerProperties.form = "form1_shooting";
+            playerProperties.form = "form1_shooting";
 
         }
         else if (cursors.left.isDown)
         {
             player.setVelocityX(-100);
-            // playerProperties.form = "form2_shooting";
+            playerProperties.form = "form2_shooting";
         }
         else if (cursors.right.isDown)
         {
             player.setVelocityX(100);
-            // playerProperties.form = "form3_shooting";
+            playerProperties.form = "form3_shooting";
         }
         else{
             player.setVelocityX(0);
@@ -492,20 +515,24 @@ function update ()
 function bulletsToFire(stageCheck){
 
     if(stageCheck[0]){
+        playerProperties.bulletsFired += 1;
         bullets.create(player.x, player.y - 40, "bullet").setScale(0.5);
     }
     
     if(stageCheck[1]){
+        playerProperties.bulletsFired += 2;
         bullets.create(player.x + 10, player.y - 20, "bullet").setScale(0.5);
         bullets.create(player.x - 10, player.y - 20, "bullet").setScale(0.5);
     }
     
     if(stageCheck[2]){
+        playerProperties.bulletsFired += 2;
         bullets.create(player.x + 20, player.y - 20, "bullet").setScale(0.5);
         bullets.create(player.x - 20, player.y - 20, "bullet").setScale(0.5);
     }
     
     if(stageCheck[3]){
+        playerProperties.bulletsFired += 2;
         bullets.create(player.x + 30, player.y - 10, "bullet").setScale(0.5);
         bullets.create(player.x - 30, player.y - 10, "bullet").setScale(0.5);
     }
@@ -520,6 +547,7 @@ function shoot(){
         bulletsToFire([true,true,false,false]);
     }
     if (playerProperties.form == "form2_shooting"){
+        
         bulletsToFire([true,true,true,false]);
     }
     if (playerProperties.form == "form3_shooting"){
@@ -554,7 +582,8 @@ function checkBullets(){
                         }
                     }
                     if (enemy_child.health == 0){
-                        playerProperties.points = playerProperties.points + 20;
+                        playerProperties.points += 20;
+                        playerProperties.enemiesKilled += 1;
                         score.setText(`Score: ${playerProperties.points}`);
                         var explosion = explosions.create(enemyObject.x, enemyObject.y, "explosion");
                         explosion.anims.play("boom", true);
