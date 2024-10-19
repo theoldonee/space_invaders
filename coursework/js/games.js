@@ -37,8 +37,7 @@ window.onload = function (){
     }
 };
 var healthPowerup;
-var player, bullets, explosions, cursors, keyboard, score
-var jet_explosion;
+var player, bullets, explosions, cursors, keyboard, score, lifeBar;
 
 const playerProperties = {
     health: 200,
@@ -173,9 +172,9 @@ class Enemy{
 
     // determines the velocity of each pullet
     static setBulletVelocity(playerX, playerY, bullet_object, seconds){
+
         var velX = (playerX - bullet_object.x)/seconds; // calculation for velocity in x direction
         var velY = (playerY - bullet_object.y)/seconds; // calculation for velocity in y direction
-
         bullet_object.setVelocityX(velX);
         bullet_object.setVelocityY(velY);
     }
@@ -188,9 +187,11 @@ class Enemy{
         if (this.type == "enemy_type_1") {
             enemyBullet = Enemy.physics.add.sprite(this.object.x + 4, this.object.y + 10,"enemy_bullet").setScale(0.5);
             Enemy.bullet.push(enemyBullet);
+            // alert(Enemy.bullet.length);
         }else{
             enemyBullet = Enemy.physics.add.sprite(this.object.x + 4, this.object.y + 18,"enemy_bullet").setScale(0.5);
             Enemy.bullet.push(enemyBullet);
+            // alert(Enemy.bullet.length);
         }
 
         Enemy.setBulletVelocity(x, y, enemyBullet, 5);
@@ -293,6 +294,7 @@ class Enemy{
 }
 
 class Controller{
+    static size = 200;
     static frameRate = 5; // frame rate of animations
     static count = 0;
     static start;
@@ -360,7 +362,9 @@ class Controller{
             if (child){
                 // checks if bullet is no more on screen
                 if (child.y < 0){
-                    child.destroy(); // destroys bullet         
+                    child.disableBody(true, true);
+                    child.destroy(); // destroys bullet   
+                    child = null;      
                 }
     
                 Enemy.children.forEach((enemy_child) => {
@@ -368,7 +372,9 @@ class Controller{
 
                     // chceks if bullet is in contact with an enemy
                     if ((((enemyObject.x + 25) >= child.x) && ((enemyObject.x - 25) <= child.x)) && (child.y == enemyObject.y)){
+                        child.disableBody(true, true);
                         child.destroy(); // destroys bullet
+                        child = null; 
 
                         // checks if enemy health is above zero
                         if (enemy_child.health != 0){
@@ -400,7 +406,8 @@ class Controller{
             // checks if enemy bullet is no more on screen
             if (bullet_child.y > 800){   
                 bullet_child.destroy();  
-                Enemy.bullet.splice(index, 1);           
+                Enemy.bullet.splice(index, 1);  
+                bullet_child = null;
             }
             
 
@@ -412,6 +419,7 @@ class Controller{
                     playerProperties.isRed = true;
                     playerProperties.health -= 25;
                     this.flicker(playerProperties, "red");
+                    bullet_child = null;
     
             }
         
@@ -636,10 +644,10 @@ function create ()
     //     fill: "#ffffff",
     // });
 
-
+    lifeBar = this.add.graphics();
     cursors = this.input.keyboard.createCursorKeys();
     keyboard = this.input.keyboard.addKeys("Q, P");
-
+    
 }
 
 function update ()
@@ -663,16 +671,17 @@ function update ()
 
     if (!(Controller.paused)){
         Enemy.check();
-        
-        if (Controller.count % 50 == 0){
-            if (playerProperties.form != "base_form"){
-                
-                shoot();
-            }else{
-                player.anims.play(playerProperties.form, true);
-            }
-            
+
+        lifeBar.fillStyle(0x2d2d2d);
+        lifeBar.fillRect(45, 40, Controller.size, 20);
+
+        if(!(playerProperties.health < 25)){
+            lifeBar.fillStyle(0x2dff2d);
+            lifeBar.fillRect(45, 40, playerProperties.health, 20);
         }
+        
+
+        
 
         if (Controller.count % 75 == 0){
 
@@ -682,6 +691,16 @@ function update ()
         }
     
         if(Controller.flag){
+            if (Controller.count % 50 == 0){
+                if (playerProperties.form != "base_form"){
+                    player.anims.play(playerProperties.form, true);
+                    // shoot();
+                }else{
+                    player.anims.play(playerProperties.form, true);
+                }
+                
+            }
+
             if (cursors.up.isDown){
                 playerProperties.form = "base_form_shooting";
             }
@@ -710,7 +729,7 @@ function update ()
         }
         
         if(playerProperties.health < 1){
-            Controller.playerDead(this);
+            // Controller.playerDead(this);
         }
         if ((( player.x - 20 <= healthPowerup.x) && (player.x + 20 >= healthPowerup.x)) && 
         (( healthPowerup.y >=  player.y - 20 ) && (healthPowerup.y <  player.y + 20))){
@@ -719,8 +738,11 @@ function update ()
         }
     
         Controller.checkPowerups();
-    
-        if (Controller.count == 1350){
+        
+        console.log(Controller.count);
+        if (Controller.count == 1200){
+            console.log(`---------------------------------------------------------------------------------------------\n
+                =======================================================================================================`);
             Controller.count = 0;
         }
         Controller.checkExplosion();
@@ -730,6 +752,7 @@ function update ()
 }
 
 function shoot(){
+    // console.log(bullets.getLength())
     if (playerProperties.form == "base_form_shooting"){
         Controller.bulletsToFire([true,false,false,false]);
     }
