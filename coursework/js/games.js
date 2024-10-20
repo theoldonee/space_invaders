@@ -29,6 +29,7 @@ window.onload = function (){
     }
     else{
         if (UserManager.isUser(email)){
+            Controller.userEmail = email;
             game  = new Phaser.Game(config);
         }else{
             alert("Only registered users can play");
@@ -50,8 +51,7 @@ const playerProperties = {
     form: 'base_form_shooting',
     points: 0,
     enemiesKilled: 0,
-    bulletsFired: 0,
-    playTimePased: 0,
+    bulletsFired: 0
 }
 
 class Enemy{
@@ -294,6 +294,7 @@ class Enemy{
 }
 
 class Controller{
+    static userEmail;
     static size = 200;
     static frameRate = 5; // frame rate of animations
     static count = 0;
@@ -302,8 +303,12 @@ class Controller{
     static paused = false;
     static physics;
     static flag = true;
-    static getTimeElapsed(start){
-        return Math.floor( (new Date() - start) / 1150);
+    static minutesElapsed = 0;
+
+    static getTimeElapsed(){
+        const now = new Date();
+        var secondsElapsed = Math.floor( (now- this.start) / 1150);
+        return  parseFloat(parseFloat((secondsElapsed/60)).toFixed(2));
     }
 
     static pauseGame(){
@@ -364,7 +369,6 @@ class Controller{
                 if (child.y < 0){
                     child.disableBody(true, true);
                     child.destroy(); // destroys bullet   
-                    child = null;      
                 }
     
                 Enemy.children.forEach((enemy_child) => {
@@ -374,7 +378,6 @@ class Controller{
                     if ((((enemyObject.x + 25) >= child.x) && ((enemyObject.x - 25) <= child.x)) && (child.y == enemyObject.y)){
                         child.disableBody(true, true);
                         child.destroy(); // destroys bullet
-                        child = null; 
 
                         // checks if enemy health is above zero
                         if (enemy_child.health != 0){
@@ -404,23 +407,22 @@ class Controller{
             var index;
             index = Enemy.bullet.indexOf(bullet_child);
             // checks if enemy bullet is no more on screen
-            if (bullet_child.y > 800){   
+            if (bullet_child.y > 800){ 
+                bullet_child.disableBody(true, true);  
                 bullet_child.destroy();  
                 Enemy.bullet.splice(index, 1);  
-                bullet_child = null;
             }
             
 
             // checks if enemy bullet in contact with player
             if ((( player.x - 20 <= bullet_child.x) && (player.x + 20 >= bullet_child.x)) && 
                 (( bullet_child.y >=  player.y ) && (bullet_child.y <  player.y + 20))){
+                    bullet_child.disableBody(true, true);  
                     bullet_child.destroy();
                     Enemy.bullet.splice(index, 1);
                     playerProperties.isRed = true;
                     playerProperties.health -= 25;
                     this.flicker(playerProperties, "red");
-                    bullet_child = null;
-    
             }
         
         }); 
@@ -498,7 +500,6 @@ class Controller{
     static playerDead(classRef){
         if(this.flag){
             player.destroy();
-            // var x = player.x;
             this.flag = false;
             var jet_explosion = this.physics.add.sprite(player.x, player.y + 10, "jet_explosion").setScale(3);
             jet_explosion.anims.play("jet_boom", true);
@@ -510,6 +511,15 @@ class Controller{
                     fill: "#ffffff",
                 });
             }, classRef);
+
+            this.minutesElapsed = this.getTimeElapsed();
+            UserManager.updateUserInfo(
+                this.userEmail, 
+                playerProperties.points, 
+                this.minutesElapsed, 
+                playerProperties.bulletsFired, 
+                playerProperties.enemiesKilled
+            );
         }
     }
 
@@ -542,6 +552,7 @@ function create ()
     Enemy.setTweens(this.tweens);
 
     Controller.setPhysics(this.physics);
+    Controller.initializeStart();
     player = this.physics.add.sprite(500, 700, "jet").setScale(1.5);
     playerProperties.object = player;
     playerProperties.playTimeStart = new Date();
@@ -672,13 +683,13 @@ function update ()
     if (!(Controller.paused)){
         Enemy.check();
 
-        lifeBar.fillStyle(0x2d2d2d);
-        lifeBar.fillRect(45, 40, Controller.size, 20);
+        // lifeBar.fillStyle(0x2d2d2d);
+        // lifeBar.fillRect(45, 40, Controller.size, 20);
 
-        if(!(playerProperties.health < 25)){
-            lifeBar.fillStyle(0x2dff2d);
-            lifeBar.fillRect(45, 40, playerProperties.health, 20);
-        }
+        // if(!(playerProperties.health < 25)){
+        //     lifeBar.fillStyle(0x2dff2d);
+        //     lifeBar.fillRect(45, 40, playerProperties.health, 20);
+        // }
         
 
         
@@ -694,7 +705,7 @@ function update ()
             if (Controller.count % 50 == 0){
                 if (playerProperties.form != "base_form"){
                     player.anims.play(playerProperties.form, true);
-                    // shoot();
+                    shoot();
                 }else{
                     player.anims.play(playerProperties.form, true);
                 }
@@ -729,7 +740,7 @@ function update ()
         }
         
         if(playerProperties.health < 1){
-            // Controller.playerDead(this);
+            Controller.playerDead(this);
         }
         if ((( player.x - 20 <= healthPowerup.x) && (player.x + 20 >= healthPowerup.x)) && 
         (( healthPowerup.y >=  player.y - 20 ) && (healthPowerup.y <  player.y + 20))){
@@ -738,11 +749,8 @@ function update ()
         }
     
         Controller.checkPowerups();
-        
-        console.log(Controller.count);
+
         if (Controller.count == 1200){
-            console.log(`---------------------------------------------------------------------------------------------\n
-                =======================================================================================================`);
             Controller.count = 0;
         }
         Controller.checkExplosion();
