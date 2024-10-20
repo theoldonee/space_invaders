@@ -56,15 +56,14 @@ const playerProperties = {
 
 class Powerups{
     static physics;
-
     static powerupTypes = ["health", "upgrade1", "upgrade2", "upgrade3"];
-
     static children = [];
     constructor(){
         this.type = Powerups.powerupTypes[(Math.floor(Math.random() * Powerups.powerupTypes.length))];
         this.collected = false;
         this.object = Powerups.createPowerup(this.type);
         this.object.body.setVelocityY(80);
+        Powerups.children.push(this);
     }
 
     static setPhysics(classClass){
@@ -342,14 +341,14 @@ class Controller{
     static frameRate = 5; // frame rate of animations
     static count = 0;
     static start;
-    static contactHealth;
+    static powerupContact;
     static paused = false;
     static pauseInitialized;
     static pauseStart;
     static totalPauseTime = 0;
 
-    static resumeInitialized = true;
-    static playTimeStart;
+    // static resumeInitialized = true;
+    // static playTimeStart;
     static totalPlayTime = 0;
     static resumed;
     static physics;
@@ -372,10 +371,10 @@ class Controller{
         this.totalPauseTime += secondsElapsed;
     }
 
-    static updateSecondsplayTime(){
-        var secondsElapsed = this.getSecondsElapsed(this.playTimeStart);
-        this.totalPlayTime += secondsElapsed;
-    }
+    // static updateSecondsplayTime(){
+    // //     var secondsElapsed = this.getSecondsElapsed(this.playTimeStart);
+    // //     this.totalPlayTime += secondsElapsed;
+    // // }
 
 
     static pauseGame(){
@@ -388,7 +387,7 @@ class Controller{
     static startGame(){
         this.paused = false;
         this.resumed = true;
-        this.resumeInitialized = true;
+        // this.resumeInitialized = true;
     }
 
     static initializeStart(){
@@ -424,21 +423,49 @@ class Controller{
             this.dropPowerUp();
         }
 
-        // if (this.contactHealth){
+        Powerups.children.forEach( (child) =>{
+            if (child){
+                var powerupObject = child.object;
+                if ((( player.x - 20 <= powerupObject.x) && (player.x + 20 >= powerupObject.x)) && 
+                (( powerupObject.y >=  player.y - 20 ) && (powerupObject.y <  player.y + 20))){
 
-        //     healthPowerup.setX(1000);
-        //     healthPowerup.destroy(true); 
+                    if(child.type == "health"){
+                        playerProperties.health += 25;
+                    }else if (child.type == "upgrade1"){
+                        playerProperties.form = "form1_shooting";
+                    }else if (child.type == "upgrade2"){
+                        playerProperties.form = "form2_shooting";
+                    }else{
+                        playerProperties.form = "form3_shooting";
+                    }
 
-        //     // make health stop only when flicker complete
-        //     if (playerProperties.flickerCount > playerProperties.flickerStop){
-        //         this.contactHealth = false;
-        //     }
-        //     else{
-        //         this.flicker(playerProperties, 'green');
-        //     }  
-            
-        // }
+                    powerupObject.destroy();
+                    Powerups.children.pop();
+                    this.powerupContact = true;
+                }
+
+                if(powerupObject.y > 800){
+                    powerupObject.destroy();
+                    Powerups.children.pop();
+                }
+            }
+
+        });
+        
+
+        if (this.powerupContact){
+            // make health stop only when flicker complete
+            if (playerProperties.flickerCount > playerProperties.flickerStop){
+                this.powerupContact = false;
+            }
+            else{
+                this.flicker(playerProperties, 'green');
+            }  
+
+        }
     }
+
+    static destroyPowerup
 
     // checks all bullets fired
     static checkBullets(){
@@ -644,10 +671,8 @@ function create ()
     player = this.physics.add.sprite(500, 700, "jet").setScale(1.5);
     playerProperties.object = player;
     playerProperties.playTimeStart = new Date();
-
-    healthPowerup = this.physics.add.sprite(500, 300, 'health');
     player.setCollideWorldBounds(true);
-    healthPowerup.body.setVelocityY(80);
+
 
     this.anims.create({
         key: "boom",
@@ -785,8 +810,8 @@ function update ()
 
         if(!(Controller.pauseInitialized)){
             Controller.pauseInitialized = true;
-            Controller.updateSecondsplayTime();
-            Controller.pauseStart = new Date();
+            // Controller.updateSecondsplayTime();
+            // Controller.pauseStart = new Date();
         }
 
     }else{
@@ -803,10 +828,10 @@ function update ()
     if (!(Controller.paused)){
         Enemy.check();
 
-        if(Controller.resumeInitialized){
-            Controller.playTimeStart = new Date();
-            Controller.resumeInitialized = false;
-        }
+        // if(Controller.resumeInitialized){
+        //     Controller.playTimeStart = new Date();
+        //     Controller.resumeInitialized = false;
+        // }
 
         if (Controller.count % 75 == 0){
 
@@ -857,20 +882,13 @@ function update ()
             Controller.playerDead(this);
         }
 
-        if ((( player.x - 20 <= healthPowerup.x) && (player.x + 20 >= healthPowerup.x)) && 
-        (( healthPowerup.y >=  player.y - 20 ) && (healthPowerup.y <  player.y + 20))){
-            Controller.contactHealth = true;
-        }
-    
         Controller.checkPowerups();
 
         if (Controller.count == 3900){
             Controller.count = 0;
         }
 
-        Controller.checkExplosion();
-
-       
+        Controller.checkExplosion();       
     }
     
 }
