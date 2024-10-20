@@ -133,14 +133,13 @@ function createUser(){
         email: email,
         DOB: dob,
         gender: gender,
-        highscore: Math.floor(Math.random() * 1000),
-        enemiesKilled: Math.floor(Math.random() * 1000),
-        playTime: Math.floor(Math.random() * 1000),
-        bulletsFired: Math.floor(Math.random() * 2000),
+        highscore: 0,
+        enemiesKilled: 0,
+        playTime: 0,
+        bulletsFired: 0,
     };
 
     registeredUsers.push(user);
-    // localStorage.setItem("registeredUsers", JSON.stringify(registeredUsers));
     UserManager.updateRegisteredUsers(registeredUsers);
 }
 
