@@ -9,13 +9,6 @@ function redirect(display_content){
 // localStorage.removeItem("registeredUsers");
 class UserManager{
 
-    static userEmail;
-    // static registeredUsers = this.getAllUsers();
-
-    static setUser(email){
-        this.userEmail = email;
-    }
-
     static getAllUsers(){
         if (localStorage.registeredUsers){
             return JSON.parse(localStorage.registeredUsers);
@@ -89,6 +82,23 @@ class UserManager{
                 return i + 1;
             }
         }
+    }
+
+    static updateUserInfo(email, score, playTime, bulletsFired, enemiesKilled){
+        var registeredUsers = this.getAllUsers();
+
+        for(var user of registeredUsers){
+            if (user.email == email){
+                if(user.highscore < score){
+                    user.highscore = score;
+                }
+                user.playTime += playTime;
+                user.bulletsFired += bulletsFired;
+                user.enemiesKilled += enemiesKilled;
+            }
+        }
+
+        this.updateRegisteredUsers(registeredUsers);
     }
 
 }
