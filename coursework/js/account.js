@@ -44,7 +44,7 @@ function displayAccountInfo(user){
     `
     
     document.getElementById("highscore").innerHTML = user.highscore;
-    document.getElementById("playtime").innerHTML = user.playTime;
+    document.getElementById("playtime").innerHTML = `${user.playTime}m`;
     document.getElementById("bulletsfired").innerHTML = user.bulletsFired;
     document.getElementById("enemieskilled").innerHTML = user.enemiesKilled;
 
