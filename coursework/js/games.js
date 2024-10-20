@@ -38,7 +38,7 @@ window.onload = function (){
     }
 };
 var healthPowerup;
-var player, bullets, explosions, cursors, keyboard, score, lifeBar;
+var player, bullets, explosions, cursors, keyboard, score;
 
 const playerProperties = {
     health: 200,
@@ -301,22 +301,38 @@ class Controller{
     static start;
     static contactHealth;
     static paused = false;
+    static pauseInitialized;
+    static pauseStart;
+    static totalPauseTime = 0;
+    static resumed;
     static physics;
+    static add;
     static flag = true;
     static minutesElapsed = 0;
 
-    static getTimeElapsed(){
-        const now = new Date();
-        var secondsElapsed = Math.floor( (now- this.start) / 1150);
+    static getMinutesElapsed(){
+        var secondsElapsed = this.getSecondsElapsed(this.start);
         return  parseFloat(parseFloat((secondsElapsed/60)).toFixed(2));
+    }
+
+    static getSecondsElapsed(dateClass){
+        const now = new Date();
+        return Math.floor( (now - dateClass) / 1150);
+    }
+
+    static updateSecondsPaused(){
+        var secondsElapsed = this.getSecondsElapsed(this.pauseStart);
+        this.totalPauseTime += secondsElapsed;
     }
 
     static pauseGame(){
         this.paused = true;
+        this.pauseInitialized = false;
     }
 
     static startGame(){
         this.paused = false;
+        this.resumed = true;
     }
 
     static initializeStart(){
@@ -326,6 +342,10 @@ class Controller{
     // sets physics class for enemy class use
     static setPhysics(classClass){
         this.physics = classClass;
+    }
+
+    static setAdd(classClass){
+        this.add = classClass;
     }
 
     // Checks if an explosion is displayed
@@ -367,7 +387,6 @@ class Controller{
             if (child){
                 // checks if bullet is no more on screen
                 if (child.y < 0){
-                    child.disableBody(true, true);
                     child.destroy(); // destroys bullet   
                 }
     
@@ -376,7 +395,6 @@ class Controller{
 
                     // chceks if bullet is in contact with an enemy
                     if ((((enemyObject.x + 25) >= child.x) && ((enemyObject.x - 25) <= child.x)) && (child.y == enemyObject.y)){
-                        child.disableBody(true, true);
                         child.destroy(); // destroys bullet
 
                         // checks if enemy health is above zero
@@ -407,8 +425,7 @@ class Controller{
             var index;
             index = Enemy.bullet.indexOf(bullet_child);
             // checks if enemy bullet is no more on screen
-            if (bullet_child.y > 800){ 
-                bullet_child.disableBody(true, true);  
+            if (bullet_child.y > 800){  
                 bullet_child.destroy();  
                 Enemy.bullet.splice(index, 1);  
             }
@@ -417,7 +434,6 @@ class Controller{
             // checks if enemy bullet in contact with player
             if ((( player.x - 20 <= bullet_child.x) && (player.x + 20 >= bullet_child.x)) && 
                 (( bullet_child.y >=  player.y ) && (bullet_child.y <  player.y + 20))){
-                    bullet_child.disableBody(true, true);  
                     bullet_child.destroy();
                     Enemy.bullet.splice(index, 1);
                     playerProperties.isRed = true;
@@ -512,7 +528,7 @@ class Controller{
                 });
             }, classRef);
 
-            this.minutesElapsed = this.getTimeElapsed();
+            this.minutesElapsed = this.getMinutesElapsed();
             UserManager.updateUserInfo(
                 this.userEmail, 
                 playerProperties.points, 
@@ -521,6 +537,10 @@ class Controller{
                 playerProperties.enemiesKilled
             );
         }
+    }
+
+    static createLifeBar(){
+        return  this.add.graphics();
     }
 
 }
@@ -537,6 +557,7 @@ function preload ()
 
     // load powerup sprites
     this.load.image('health', 'sprites/powerups/health.png');
+    this.load.image('upgrades', 'sprites/powerups/health.png');
 
     // load enemy sprites
     this.load.spritesheet('enemy_type_1', 'sprites/enemies/enemy_type_1.png', { frameWidth: 23, frameHeight: 19 });
@@ -552,6 +573,7 @@ function create ()
     Enemy.setTweens(this.tweens);
 
     Controller.setPhysics(this.physics);
+    Controller.setAdd(this.add);
     Controller.initializeStart();
     player = this.physics.add.sprite(500, 700, "jet").setScale(1.5);
     playerProperties.object = player;
@@ -655,7 +677,7 @@ function create ()
     //     fill: "#ffffff",
     // });
 
-    lifeBar = this.add.graphics();
+   
     cursors = this.input.keyboard.createCursorKeys();
     keyboard = this.input.keyboard.addKeys("Q, P");
     
@@ -672,27 +694,28 @@ function update ()
     }
 
     if (Controller.paused){
-        this.physics.pause();
-        this.anims.pauseAll();
-        this.tweens.pauseAll();
+        this.physics.pause(); // stops physics
+        this.anims.pauseAll(); // stops all animations
+        this.tweens.pauseAll(); // stops all timed movements
+
+        if(!(Controller.pauseInitialized)){
+            Controller.pauseInitialized = true;
+            Controller.pauseStart = new Date();
+        }
+
     }else{
-        this.physics.resume();
-        this.anims.resumeAll();
+
+        if(Controller.resumed){
+            this.physics.resume();
+            this.anims.resumeAll();
+            Controller.resumed = false;
+            Controller.updateSecondsPaused();
+
+        }
     }
 
     if (!(Controller.paused)){
         Enemy.check();
-
-        // lifeBar.fillStyle(0x2d2d2d);
-        // lifeBar.fillRect(45, 40, Controller.size, 20);
-
-        // if(!(playerProperties.health < 25)){
-        //     lifeBar.fillStyle(0x2dff2d);
-        //     lifeBar.fillRect(45, 40, playerProperties.health, 20);
-        // }
-        
-
-        
 
         if (Controller.count % 75 == 0){
 
@@ -740,7 +763,7 @@ function update ()
         }
         
         if(playerProperties.health < 1){
-            Controller.playerDead(this);
+            // Controller.playerDead(this);
         }
         if ((( player.x - 20 <= healthPowerup.x) && (player.x + 20 >= healthPowerup.x)) && 
         (( healthPowerup.y >=  player.y - 20 ) && (healthPowerup.y <  player.y + 20))){
@@ -755,6 +778,7 @@ function update ()
         }
         Controller.checkExplosion();
 
+       
     }
     
 }
