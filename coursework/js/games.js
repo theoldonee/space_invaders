@@ -54,6 +54,49 @@ const playerProperties = {
     bulletsFired: 0
 }
 
+class Powerups{
+    static physics;
+
+    static powerupTypes = ["health", "upgrade1", "upgrade2", "upgrade3"];
+
+    static children = [];
+    constructor(){
+        this.type = Powerups.powerupTypes[(Math.floor(Math.random() * Powerups.powerupTypes.length))];
+        this.collected = false;
+        this.object = Powerups.createPowerup(this.type);
+        this.object.body.setVelocityY(80);
+    }
+
+    static setPhysics(classClass){
+        this.physics = classClass;
+    }
+
+    static createPowerup(type){
+    
+        var object;
+        var x = Math.floor(Math.random() * 800);
+        if(x < 50){
+            x = 50;
+        }
+
+        if (type != "health"){
+            object = Powerups.physics.add.sprite(x, 0, "upgrades");
+            if(type == "upgrade1"){
+                object.anims.play(type, true);
+            }else if(type == "upgrade2"){
+                object.anims.play(type, true);
+            }else{
+                object.anims.play(type, true);
+            }
+        }else{
+            object = Powerups.physics.add.sprite(x, 0, "health");
+        }
+
+        return object;
+    }
+
+}
+
 class Enemy{
     static enemyType1Children = [];
     static type1UpgradedChildren = [];
@@ -327,7 +370,9 @@ class Controller{
 
     static pauseGame(){
         this.paused = true;
-        this.pauseInitialized = false;
+        if(this.flag){
+            this.pauseInitialized = false;
+        }
     }
 
     static startGame(){
@@ -557,7 +602,7 @@ function preload ()
 
     // load powerup sprites
     this.load.image('health', 'sprites/powerups/health.png');
-    this.load.image('upgrades', 'sprites/powerups/health.png');
+    this.load.spritesheet('upgrades', 'sprites/powerups/jet_upgrades.png', { frameWidth: 32, frameHeight: 33 });
 
     // load enemy sprites
     this.load.spritesheet('enemy_type_1', 'sprites/enemies/enemy_type_1.png', { frameWidth: 23, frameHeight: 19 });
@@ -575,6 +620,8 @@ function create ()
     Controller.setPhysics(this.physics);
     Controller.setAdd(this.add);
     Controller.initializeStart();
+
+    Powerups.setPhysics(this.physics);
     player = this.physics.add.sprite(500, 700, "jet").setScale(1.5);
     playerProperties.object = player;
     playerProperties.playTimeStart = new Date();
@@ -610,6 +657,7 @@ function create ()
         frameRate: Controller.frameRate,
         repeat: -1
     });
+
     this.anims.create({
         key: "form1",
         frames: this.anims.generateFrameNumbers('jet', { start: 2, end: 2 }),
@@ -617,14 +665,12 @@ function create ()
         repeat: -1
     });
 
-
     this.anims.create({
         key: "form1_shooting",
         frames: this.anims.generateFrameNumbers('jet', { start: 2, end: 3 }),
         frameRate: Controller.frameRate,
         repeat: -1
     });
-
 
     this.anims.create({
         key: "form2_shooting",
@@ -663,6 +709,26 @@ function create ()
         repeat: 1
     });
 
+    this.anims.create({
+        key: "upgrade1",
+        frames: this.anims.generateFrameNumbers('upgrades', { start: 0, end: 0 }),
+        frameRate: Controller.frameRate,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: "upgrade2",
+        frames: this.anims.generateFrameNumbers('upgrades', { start: 1, end: 1 }),
+        frameRate: Controller.frameRate,
+        repeat: -1
+    });
+
+    this.anims.create({
+        key: "upgrade3",
+        frames: this.anims.generateFrameNumbers('upgrades', { start: 2, end: 2 }),
+        frameRate: Controller.frameRate,
+        repeat: -1
+    });
 
     bullets = this.physics.add.group();
     explosions = this.physics.add.group();
@@ -776,6 +842,12 @@ function update ()
         if (Controller.count == 1200){
             Controller.count = 0;
         }
+
+        if (Controller.count == 500){
+            const powerup = new Powerups();
+        }
+
+
         Controller.checkExplosion();
 
        
