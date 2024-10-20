@@ -347,6 +347,10 @@ class Controller{
     static pauseInitialized;
     static pauseStart;
     static totalPauseTime = 0;
+
+    static resumeInitialized = true;
+    static playTimeStart;
+    static totalPlayTime = 0;
     static resumed;
     static physics;
     static add;
@@ -368,6 +372,12 @@ class Controller{
         this.totalPauseTime += secondsElapsed;
     }
 
+    static updateSecondsplayTime(){
+        var secondsElapsed = this.getSecondsElapsed(this.playTimeStart);
+        this.totalPlayTime += secondsElapsed;
+    }
+
+
     static pauseGame(){
         this.paused = true;
         if(this.flag){
@@ -378,10 +388,11 @@ class Controller{
     static startGame(){
         this.paused = false;
         this.resumed = true;
+        this.resumeInitialized = true;
     }
 
     static initializeStart(){
-          this.start = new Date();
+        this.start = new Date();
     }
 
     // sets physics class for enemy class use
@@ -408,21 +419,25 @@ class Controller{
 
     // Checks if player is in contact with a powerup
     static checkPowerups(){
-        if (this.contactHealth){
 
-            healthPowerup.setX(1000);
-            healthPowerup.destroy(true); 
-
-            // make health stop only when flicker complete
-            if (playerProperties.flickerCount > playerProperties.flickerStop){
-                this.contactHealth = false;
-            }
-            else{
-
-                this.flicker(playerProperties, 'green');
-            }  
-            
+        if(this.count % 2700 == 0){
+            this.dropPowerUp();
         }
+
+        // if (this.contactHealth){
+
+        //     healthPowerup.setX(1000);
+        //     healthPowerup.destroy(true); 
+
+        //     // make health stop only when flicker complete
+        //     if (playerProperties.flickerCount > playerProperties.flickerStop){
+        //         this.contactHealth = false;
+        //     }
+        //     else{
+        //         this.flicker(playerProperties, 'green');
+        //     }  
+            
+        // }
     }
 
     // checks all bullets fired
@@ -488,6 +503,10 @@ class Controller{
         
         }); 
     
+    }
+
+    static dropPowerUp(){
+        const powerup = new Powerups();
     }
     
     // Function that flickers player
@@ -766,6 +785,7 @@ function update ()
 
         if(!(Controller.pauseInitialized)){
             Controller.pauseInitialized = true;
+            Controller.updateSecondsplayTime();
             Controller.pauseStart = new Date();
         }
 
@@ -783,6 +803,11 @@ function update ()
     if (!(Controller.paused)){
         Enemy.check();
 
+        if(Controller.resumeInitialized){
+            Controller.playTimeStart = new Date();
+            Controller.resumeInitialized = false;
+        }
+
         if (Controller.count % 75 == 0){
 
             Enemy.children.forEach((child) =>{
@@ -791,7 +816,7 @@ function update ()
         }
     
         if(Controller.flag){
-            if (Controller.count % 50 == 0){
+            if (Controller.count % 100 == 0){
                 if (playerProperties.form != "base_form"){
                     player.anims.play(playerProperties.form, true);
                     shoot();
@@ -829,24 +854,19 @@ function update ()
         }
         
         if(playerProperties.health < 1){
-            // Controller.playerDead(this);
+            Controller.playerDead(this);
         }
+
         if ((( player.x - 20 <= healthPowerup.x) && (player.x + 20 >= healthPowerup.x)) && 
         (( healthPowerup.y >=  player.y - 20 ) && (healthPowerup.y <  player.y + 20))){
             Controller.contactHealth = true;
-    
         }
     
         Controller.checkPowerups();
 
-        if (Controller.count == 1200){
+        if (Controller.count == 3900){
             Controller.count = 0;
         }
-
-        if (Controller.count == 500){
-            const powerup = new Powerups();
-        }
-
 
         Controller.checkExplosion();
 
