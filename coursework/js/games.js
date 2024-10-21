@@ -29,15 +29,26 @@ window.onload = function (){
     }
     else{
         if (UserManager.isUser(email)){
+
             Controller.userEmail = email;
             game  = new Phaser.Game(config);
+
+            document.getElementById("logout").addEventListener("click", () =>{
+                redirect('login',false);
+            });
+            
+            document.getElementById("account").addEventListener("click", () =>{
+                var url = `account.html?${email}`;
+                window.open(url, "_blank");
+            });
+
         }else{
             alert("Only registered users can play");
         }
        
     }
 };
-var healthPowerup;
+
 var player, bullets, explosions, cursors, keyboard, score;
 
 const playerProperties = {
@@ -346,14 +357,11 @@ class Controller{
     static pauseInitialized;
     static pauseStart;
     static totalPauseTime = 0;
-
-    // static resumeInitialized = true;
-    // static playTimeStart;
     static totalPlayTime = 0;
     static resumed;
     static physics;
     static add;
-    static flag = true;
+    static flag = true; // deterines 
     static minutesElapsed = 0;
 
     static getMinutesElapsed(){
@@ -371,12 +379,6 @@ class Controller{
         this.totalPauseTime += secondsElapsed;
     }
 
-    // static updateSecondsplayTime(){
-    // //     var secondsElapsed = this.getSecondsElapsed(this.playTimeStart);
-    // //     this.totalPlayTime += secondsElapsed;
-    // // }
-
-
     static pauseGame(){
         this.paused = true;
         if(this.flag){
@@ -387,7 +389,6 @@ class Controller{
     static startGame(){
         this.paused = false;
         this.resumed = true;
-        // this.resumeInitialized = true;
     }
 
     static initializeStart(){
@@ -456,6 +457,7 @@ class Controller{
         if (this.powerupContact){
             // make health stop only when flicker complete
             if (playerProperties.flickerCount > playerProperties.flickerStop){
+                playerProperties.flickerCount = 0;
                 this.powerupContact = false;
             }
             else{
@@ -464,8 +466,6 @@ class Controller{
 
         }
     }
-
-    static destroyPowerup
 
     // checks all bullets fired
     static checkBullets(){
@@ -532,6 +532,7 @@ class Controller{
     
     }
 
+    // drops powerup
     static dropPowerUp(){
         const powerup = new Powerups();
     }
@@ -810,8 +811,6 @@ function update ()
 
         if(!(Controller.pauseInitialized)){
             Controller.pauseInitialized = true;
-            // Controller.updateSecondsplayTime();
-            // Controller.pauseStart = new Date();
         }
 
     }else{
@@ -827,11 +826,6 @@ function update ()
 
     if (!(Controller.paused)){
         Enemy.check();
-
-        // if(Controller.resumeInitialized){
-        //     Controller.playTimeStart = new Date();
-        //     Controller.resumeInitialized = false;
-        // }
 
         if (Controller.count % 75 == 0){
 
@@ -917,3 +911,7 @@ function shoot(){
 function redirect(display_content){
     window.location.href = `form.html?${display_content}`;
 }
+
+window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+});

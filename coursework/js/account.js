@@ -50,3 +50,11 @@ function displayAccountInfo(user){
 
 
 }
+
+document.getElementById("logout").addEventListener("click", () =>{
+    redirect('login',false);
+});
+
+function redirect(display_content){
+    window.location.href = `form.html?${display_content}`;
+}
