@@ -1,5 +1,6 @@
 import { UserManager } from "./userManager.js";
 
+// Configuration of phaser game
 var config = {
     type: Phaser.AUTO,
     width: 1000,
@@ -51,6 +52,7 @@ window.onload = function (){
 
 var player, bullets, explosions, cursors, keyboard, score;
 
+// Player object
 const playerProperties = {
     health: 200,
     isGreen: false,
@@ -65,6 +67,7 @@ const playerProperties = {
     bulletsFired: 0
 }
 
+// Controls powerups
 class Powerups{
     static physics;
     static powerupTypes = ["health", "upgrade1", "upgrade2", "upgrade3"];
@@ -107,6 +110,7 @@ class Powerups{
 
 }
 
+// Controls enemies
 class Enemy{
     static enemyType1Children = [];
     static type1UpgradedChildren = [];
@@ -135,17 +139,17 @@ class Enemy{
         Enemy.addEnemy(this);
     }
 
-    // sets physics class for enemy class use
+    // Sets physics class for enemy class use
     static setPhysics(classClass){
         this.physics = classClass;
     }
 
-    // sets tweens class for enemy class use
+    // Sets tweens class for enemy class use
     static setTweens(classClass){
         this.tweens = classClass;
     }
     
-    // adds enemy to list
+    // Adds enemy to list
     static addEnemy(enemyObject) {
         this.children.push(enemyObject);
         if (enemyObject.type == "enemy_type_1"){
@@ -165,14 +169,14 @@ class Enemy{
         }
     }
 
-    // creates enemy object
+    // Creates enemy object
     static createEnemy(enemiesToCreate){
         for (var type of enemiesToCreate){
             var enemy = new Enemy(type.type, type.location);
         }
     }
 
-    // removes enemy from array
+    // Removes enemy from array
     static removeEnemy(enemyObject) {
         var indexInChildren = this.children.indexOf(enemyObject);
         this.children.splice(indexInChildren, 1);  
@@ -197,7 +201,7 @@ class Enemy{
         }
     }
 
-    // checks if an enemy object is in an array
+    // Checks if an enemy object is in an array
     static isInArray(enemyObject, array){
         for(var i = 0; i < array.length; i++){
             if( array[i] == enemyObject){
@@ -207,7 +211,7 @@ class Enemy{
         return false;
     }
 
-    // sets enemy health based on type
+    // Sets enemy health based on type
     static setHealth(enemyObject){
         if (enemyObject.type == "enemy_type_1"){
             enemyObject.health = 50;
@@ -223,7 +227,7 @@ class Enemy{
         }
     }
 
-    // determines the velocity of each pullet
+    // Determines the velocity of each pullet
     static setBulletVelocity(playerX, playerY, bullet_object, seconds){
 
         var velX = (playerX - bullet_object.x)/seconds; // calculation for velocity in x direction
@@ -232,26 +236,24 @@ class Enemy{
         bullet_object.setVelocityY(velY);
     }
     
-    // shoots bullet in player direction
+    // Shoots bullet in player direction
     shoot(x, y) {
         var enemyBullet;
 
-        // checks enemy type to determine where bullet should spawn
+        // Checks enemy type to determine where bullet should spawn
         if (this.type == "enemy_type_1") {
             enemyBullet = Enemy.physics.add.sprite(this.object.x + 4, this.object.y + 10,"enemy_bullet").setScale(0.5);
             enemyBullet.anims.play("bullet_blink", true)
             Enemy.bullet.push(enemyBullet);
-            // alert(Enemy.bullet.length);
         }else{
             enemyBullet = Enemy.physics.add.sprite(this.object.x + 4, this.object.y + 18,"enemy_bullet").setScale(0.5);
             Enemy.bullet.push(enemyBullet);
-            // alert(Enemy.bullet.length);
         }
 
         Enemy.setBulletVelocity(x, y, enemyBullet, 5);
     } 
 
-    // retuns the lenght of time an enemy has been on screen
+    // Retuns the lenght of time an enemy has been on screen
     getElapsedTime() {
         const now = new Date();
         return Math.floor((now - this.createdTime) / 1150);  // Return time in seconds
@@ -269,16 +271,14 @@ class Enemy{
     }
 
     static loaderCount = 1;
-    // static loaderCount = 7;
     static enemyTypes = ["enemy_type_1", "type_1_upgraded", "enemy_type_2","enemy_type_3"]
     static enemyToLoadIndex = 0;
-    // static enemyToLoadIndex = 2;
 
-    // displays enemy on screen
+    // Displays enemy on screen
     static loadEnemies(){
         var enemy_info, enemy_info1, enemy_info2, enemy_info3;
         
-        // loads enemy based off load count
+        // Loads enemy based off load count
         if (this.loaderCount == 1){
             enemy_info = {type: "enemy_type_1", location: 500 };
             this.createEnemy([enemy_info]);
@@ -313,7 +313,7 @@ class Enemy{
             }
         }
 
-        // increments count when count less than 11
+        // Increments count when count less than 11
         if (this.loaderCount < 11){
             this.loaderCount++;
         }
@@ -323,12 +323,12 @@ class Enemy{
 
     static check(){
 
-        // loads enemies if enemy list is empty
+        // Loads enemies if enemy list is empty
         if (this.children.length == 0){
             this.loadEnemies();
         }
 
-        // makes type 2 enemies jump every 5 seconds.
+        // Makes type 2 enemies jump every 5 seconds.
         this.enemyType2Children.forEach((child) => {
             if((child.getElapsedTime() + 1) % 5 == 0){
                 child.object.anims.play("jump");
@@ -336,7 +336,7 @@ class Enemy{
             }
         });
 
-        // makes type 3 enemies blink every 8 seconds.
+        // Makes type 3 enemies blink every 8 seconds.
         this.enemyType3Children.forEach((child) => {
             if((child.getElapsedTime() + 1) % 8 == 0){
                 child.object.anims.play("blink");
@@ -347,12 +347,13 @@ class Enemy{
 
 }
 
+// Manages games
 class Controller{
     static userEmail;
     static size = 200;
-    static frameRate = 5; // frame rate of animations
+    static frameRate = 5; // Frame rate of animations
     static count = 0;
-    static start;
+    static start; // The time game started
     static powerupContact;
     static paused = false;
     static pauseInitialized;
@@ -362,27 +363,30 @@ class Controller{
     static resumed;
     static physics;
     static add;
-    static flag = true; // deterines 
+    static flag = true;
     static minutesElapsed = 0;
     static isPoweredUp = false;
     static endPowerupCount = null;
 
-
+    // Returns time in minutes
     static getMinutesElapsed(){
         var secondsElapsed = this.getSecondsElapsed(this.start);
         return  parseFloat(parseFloat((secondsElapsed/60)).toFixed(2));
     }
 
+    // Returns time in seconds
     static getSecondsElapsed(dateClass){
         const now = new Date();
         return Math.floor( (now - dateClass) / 1150);
     }
 
+    // Updates seconds paised
     static updateSecondsPaused(){
         var secondsElapsed = this.getSecondsElapsed(this.pauseStart);
         this.totalPauseTime += secondsElapsed;
     }
 
+    // Pauses game
     static pauseGame(){
         this.paused = true;
         if(this.flag){
@@ -390,16 +394,18 @@ class Controller{
         }
     }
 
+    // Resumes game
     static startGame(){
         this.paused = false;
         this.resumed = true;
     }
 
+    // Initalizes start
     static initializeStart(){
         this.start = new Date();
     }
 
-    // sets physics class for enemy class use
+    // Sets physics class for enemy class use
     static setPhysics(classClass){
         this.physics = classClass;
     }
@@ -431,9 +437,11 @@ class Controller{
         Powerups.children.forEach( (child) =>{
             if (child){
                 var powerupObject = child.object;
+                // Checks if powerup has made contact with player
                 if ((( player.x - 20 <= powerupObject.x) && (player.x + 20 >= powerupObject.x)) && 
                 (( powerupObject.y >=  player.y - 20 ) && (powerupObject.y <  player.y + 20))){
 
+                    //  Checks the powerup type
                     if(child.type == "health"){
                         playerProperties.health += 25;
                     }else if (child.type == "upgrade1"){
@@ -450,6 +458,7 @@ class Controller{
                     this.isPoweredUp = true;
                 }
 
+                // checks powerup is no more on screen
                 if(powerupObject.y > 800){
                     powerupObject.destroy();
                     Powerups.children.pop();
@@ -458,6 +467,7 @@ class Controller{
 
         });
         
+        // checks if player is powered up
         if(this.isPoweredUp){
             this.endPowerupCount = this.count + 700;
             if(this.endPowerupCount > 3900){
@@ -466,6 +476,7 @@ class Controller{
             this.isPoweredUp = false;
         }
 
+        // Checks when powerup count exist
         if(this.endPowerupCount){
             
             if(this.endPowerupCount == this.count){
@@ -474,6 +485,7 @@ class Controller{
             }
         }
 
+        // Checks if player is in contact with powerup
         if (this.powerupContact){
             // make health stop only when flicker complete
             if (playerProperties.flickerCount > playerProperties.flickerStop){
@@ -487,7 +499,7 @@ class Controller{
         }
     }
 
-    // checks all bullets fired
+    // Checks all bullets fired
     static checkBullets(){
         bullets.children.iterate(function (child) {
             // checks if a child exist
@@ -552,11 +564,12 @@ class Controller{
     
     }
 
-    // drops powerup
+    // Drops powerup
     static dropPowerUp(){
         const powerup = new Powerups();
     }
 
+    // Reverts player back to normal
     static revertPowerup(){
         playerProperties.form ='base_form_shooting';
     }
@@ -602,7 +615,7 @@ class Controller{
 
     }
 
-    // determines which set of bullets to fire
+    // Determines which set of bullets to fire
     static bulletsToFire(stageCheck){
 
         if(stageCheck[0]){
@@ -629,6 +642,7 @@ class Controller{
         }
     }
 
+    // Starts game over squence
     static playerDead(classRef){
         if(this.flag){
             player.destroy();
@@ -661,6 +675,7 @@ class Controller{
 
 }
 
+// Loads images
 function preload ()
 {
 
@@ -671,11 +686,9 @@ function preload ()
     this.load.spritesheet('bullet', 'sprites/bullets/jet_bullets.png', { frameWidth: 32, frameHeight: 32 });
     this.load.spritesheet('enemy_bullet', 'sprites/bullets/enemy_bullet.png', { frameWidth: 32, frameHeight: 32 });
 
-    // load powerup sprites
     this.load.image('health', 'sprites/powerups/health.png');
     this.load.spritesheet('upgrades', 'sprites/powerups/jet_upgrades.png', { frameWidth: 32, frameHeight: 33 });
 
-    // load enemy sprites
     this.load.spritesheet('enemy_type_1', 'sprites/enemies/enemy_type_1.png', { frameWidth: 23, frameHeight: 19 });
     this.load.spritesheet('type_1_upgraded', 'sprites/enemies/enemy_type_1_upgraded.png', { frameWidth: 26, frameHeight: 19 });
     this.load.spritesheet('enemy_type_2', 'sprites/enemies/enemy_type_2.png', { frameWidth: 32, frameHeight: 26 });
@@ -683,6 +696,7 @@ function preload ()
 
 }
 
+// Creates animations, sets class properties and sprites on screen 
 function create ()
 {
     Enemy.setPhysics(this.physics);
@@ -748,7 +762,6 @@ function create ()
         repeat: -1
     });
 
-
     this.anims.create({
         key: "form3",
         frames: this.anims.generateFrameNumbers('jet', { start: 6, end: 6 }),
@@ -762,7 +775,6 @@ function create ()
         frameRate: Controller.frameRate,
         repeat: -1
     });
-
 
     this.anims.create({
         key: "jump",
@@ -813,39 +825,37 @@ function create ()
         font: "25px Montserrat",
         fill: "#ffffff",
     });
-
-    // pause = this.add.text(50, 10, `Score: ${playerProperties.points}`, {
-    //     font: "25px Montserrat",
-    //     fill: "#ffffff",
-    // });
-
    
     cursors = this.input.keyboard.createCursorKeys();
     keyboard = this.input.keyboard.addKeys("Q, P");
     
 }
 
+// Updates the game screeen
 function update ()
 {
+    // Checks if q has been pressed
     if(keyboard.Q.isDown ){
         Controller.pauseGame();
     }
-
+    // Checks if p has been pressed
     if(keyboard.P.isDown ){
         Controller.startGame();
     }
 
+    //  Checks if game has been paused
     if (Controller.paused){
         this.physics.pause(); // stops physics
         this.anims.pauseAll(); // stops all animations
         this.tweens.pauseAll(); // stops all timed movements
 
+        // Checks if a pause has been initialized
         if(!(Controller.pauseInitialized)){
             Controller.pauseInitialized = true;
         }
 
     }else{
-
+        // Checks if game is resumed
         if(Controller.resumed){
             this.physics.resume();
             this.anims.resumeAll();
@@ -855,6 +865,7 @@ function update ()
         }
     }
 
+    // Checks if game is not paused
     if (!(Controller.paused)){
         Enemy.check();
 
@@ -864,7 +875,8 @@ function update ()
                 child.shoot(playerProperties.object.x, playerProperties.object.y);
             });
         }
-    
+        
+        
         if(Controller.flag){
             if (Controller.count % 100 == 0){
                 if (playerProperties.form != "base_form"){
@@ -875,21 +887,14 @@ function update ()
                 }
                 
             }
-
-            if (cursors.up.isDown){
-                playerProperties.form = "base_form_shooting";
-            }
-            else if (cursors.down.isDown){
-                playerProperties.form = "form3_shooting";
-            }
-            else if (cursors.left.isDown)
+    
+            if (cursors.left.isDown)
             {
                 player.setVelocityX(-100);
             }
             else if (cursors.right.isDown)
             {
                 player.setVelocityX(100);
-            
             }
             else{
                 player.setVelocityX(0);
@@ -918,8 +923,8 @@ function update ()
     
 }
 
+// Determines which set of bullets are fired depending on player form
 function shoot(){
-    // console.log(bullets.getLength())
     if (playerProperties.form == "base_form_shooting"){
         Controller.bulletsToFire([true,false,false,false]);
     }
@@ -939,10 +944,12 @@ function shoot(){
     });  
 }
 
+// Redirects to form page
 function redirect(display_content){
     window.location.href = `form.html?${display_content}`;
 }
 
+// Confirms if user want to reload page
 window.addEventListener('beforeunload', function (e) {
     e.preventDefault();
 });

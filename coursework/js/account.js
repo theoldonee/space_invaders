@@ -16,7 +16,7 @@ window.onload = function (){
     }
 };
 
-
+// Displays account information
 function displayAccountInfo(user){
     var userRank = UserManager.getRank(user.email);
     var image_to_display;
@@ -41,13 +41,12 @@ function displayAccountInfo(user){
         <p><b><u>Name</u></b>: ${user.username}</p>
         <p><b><u>DOB</u></b>: ${user.DOB }</p>
         <p><b><u>Gender</u></b>: ${user.gender}</p>
-    `
+    `;
     
     document.getElementById("highscore").innerHTML = user.highscore;
     document.getElementById("playtime").innerHTML = `${parseFloat(parseFloat((user.playTime)).toFixed(2))}m`;
     document.getElementById("bulletsfired").innerHTML = user.bulletsFired;
     document.getElementById("enemieskilled").innerHTML = user.enemiesKilled;
-
 
 }
 
@@ -55,6 +54,7 @@ document.getElementById("logout").addEventListener("click", () =>{
     redirect('login',false);
 });
 
+// Redirects to form page
 function redirect(display_content){
     window.location.href = `form.html?${display_content}`;
 }

@@ -1,8 +1,7 @@
-// redirects to form page
+// Redirects to form page
 function redirect(display_content){
     window.location.href = `form.html?${display_content}`;
 }
-
 
 var highscore_data_div = document.getElementById("highcore_data");
 highscore_data_div.style.width = "600";
@@ -59,13 +58,13 @@ function showTopFive(){
     sortedList = [];
     tableList = [];
 
-    // adds user highscores to tablelist
+    // Adds user highscores to tablelist
     for(user of registeredUsers){
         tableList.push(user["highscore"]);
     };
     tableList.sort(function(a, b){return b-a});
 
-    // adds user to sortedList based on highscore
+    // Adds user to sortedList based on highscore
     for(score of tableList){
         for (user of registeredUsers){
             if(user["highscore"] == score){
@@ -74,7 +73,7 @@ function showTopFive(){
         }
     }
 
-    // checks if registered users are more than 5 and gets first 5
+    // Checks if registered users are more than 5 and gets first 5
     if (registeredUsers.lenght > 5){
         for(i = 0; i < 5; i++){
             out += userInfoRow(sortedList[i], i); 
@@ -84,14 +83,14 @@ function showTopFive(){
         var emptyRowCount;
         emptyRowCount = 5 - sortedList.length;
 
-        // checks if users exist in the sorted list
+        // Checks if users exist in the sorted list
         if(sortedList.lenght != 0){
             for(var i = 0; i < sortedList.length; i++){
                 out += userInfoRow(sortedList[i], i);
             }
         }
 
-        // generates empty rows
+        // Generates empty rows
         for (i = 0; i < emptyRowCount; i++){
             out += emptyRow();
         }

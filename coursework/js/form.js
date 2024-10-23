@@ -15,14 +15,14 @@ window.onload = function (){
     displayErrorMsg = params.split("$")[1];
     serveForm();
 
-    // displays error message
+    // Displays error message
     if (displayErrorMsg){
         document.getElementById("error_message").style.display = "inline";
     };
 
-    // checks if registeredUsers exist as a property of local storage
+    // Checks if registeredUsers exist as a property of local storage
     if (localStorage.registeredUsers){
-        // registeredUsers = JSON.parse(localStorage.registeredUsers);
+        // RegisteredUsers = JSON.parse(localStorage.registeredUsers);
         registeredUsers = UserManager.getAllUsers();
     }else{
         registeredUsers = [];
@@ -55,9 +55,9 @@ window.onload = function (){
     
 };
 
-// redirects user to form page
+// Redirects user to form page
 function redirect(displayContent, message){
-    // checks if error message should be displayed
+    // Checks if error message should be displayed
     if (message){
         window.location.href = `form.html?${displayContent}$${message}`;
     }else{
@@ -70,7 +70,7 @@ function redirect(displayContent, message){
 var formSection = document.getElementById("section_1");
 var gender, userName, email, password, dob;
 
-// checks if user and password filled isn't empty
+// Checks if user and password filled isn't empty
 function checkEmailAndPassword(){
     if (!UserManager.isEmail(email)) {
         
@@ -85,12 +85,12 @@ function checkEmailAndPassword(){
     }
 }
 
-
+// Checks if all feilds are filled
 function checkValues(){
     email = document.getElementById("email").value;
     password = document.getElementById("password").value;
     
-    // checks if register page is being displayed
+    // Checks if register page is being displayed
     if (displayContent == "register"){
         userName = document.getElementById("name").value;
         dob = document.getElementById("DOB").value;
@@ -122,10 +122,8 @@ function checkValues(){
     }   
 }
 
-
-
 var user;
-// creates a user
+// Creates a user
 function createUser(){
     user = {
         username: userName,
@@ -143,21 +141,21 @@ function createUser(){
     UserManager.updateRegisteredUsers(registeredUsers);
 }
 
-// registers a user
+// Registers a user
 function register(){
-    // checks if users exist
+    // Checks if users exist
     if (registeredUsers.length != 0){
-        // redirects to login page if user exist
+        // Redirects to login page if user exist
         if (UserManager.isUser(email)){
             redirect("login", true)
         }
         else{
-            // creates user if user does not exist
+            // Creates user if user does not exist
             createUser();
             window.location.href = `game.html?${user.email}`;
         }
     }else{
-        // creates user if no users exist
+        // Creates user if no users exist
         createUser();
         window.location.href = `game.html?${user.email}`;
     }
@@ -165,28 +163,28 @@ function register(){
     clear();  
 }
 
-// logs in a user
+// Logs in a user
 function login(){
-    // checks if users exist
+    // Checks if users exist
     if (registeredUsers.length != 0){
-        // cheks if user exist
+        // Cheks if user exist
         if (UserManager.isUser(email)){
-            // checks if the password is correct
+            // Checks if the password is correct
             var user = UserManager.getUser(email);
             if (password == user.password){
                 window.location.href = `game.html?${user.email}`;
             }else{
-                // displays error message if password is wrong
+                // Displays error message if password is wrong
                 document.getElementById("error_message").innerHTML = "Password incorrect";
                 document.getElementById("error_message").style.display = "inline";
             }
         }
         else{
-            // redirects to register page if user doesn't exist
+            // Redirects to register page if user doesn't exist
             redirect("register", true);
         }
     }else{
-        // redirects to register page if no user exist in local storage
+        // Redirects to register page if no user exist in local storage
         redirect("register", true);
     }
 
@@ -196,13 +194,13 @@ function login(){
 // A function that only makes the button clicked yellow.
 function toggle(button_id){
     var genderDivChilderen = document.getElementById("gender_div").children;
-    // makes button white if its not the right button
+    // Makes button white if its not the right button
     for(let i = 0; i < genderDivChilderen.length; i++){
         if(genderDivChilderen[i].id != button_id){
             genderDivChilderen[i].style.backgroundColor = "white";
         }
         else{
-            // makes button yellow if its the right button
+            // Makes button yellow if its the right button
             genderDivChilderen[i].style.backgroundColor = "yellow";
             gender = genderDivChilderen[i].id;
         }
@@ -210,14 +208,8 @@ function toggle(button_id){
 
 }
 
-// clears variables
+// Clears variables
 function clear(){
-
-    // document.getElementById("name").value;
-    // document.getElementById("email").value;
-    // document.getElementById("password").value;
-    // document.getElementById("DOB").value;
-
     userName = null;
     email = null;
     password = null; 

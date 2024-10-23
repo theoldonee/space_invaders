@@ -1,4 +1,4 @@
-
+// Redirects to form page
 function redirect(display_content){
     window.location.href = `form.html?${display_content}`;
 }
@@ -12,15 +12,18 @@ var list;
 var tableList = [];
 var sortedList = [];
 var tableBody = document.getElementById("table_body");
+
 function showHighscores(){
     sortTable();
 }
 
-
+// Sorts table
 function sortTable(){
     var out = '';
     var tableRow = '';
     var sort_by = document.getElementById("sort_by").value;
+
+    // Sorts table by highscore by default
     if(!sort_by){
         sort_by = "highscore";
     }
@@ -28,11 +31,14 @@ function sortTable(){
     sortedList = [];
     tableList = [];
 
+    // Fills tablelist with values to be sorted    
     for(user of registeredUsers){
         tableList.push(user[sort_by]);
     };
-    tableList.sort(function(a, b){return b-a});
 
+    tableList.sort(function(a, b){return b-a}); // sorts list in decending order
+
+    // Arranges user according to sorted values.
     for(score of tableList){
         for (user of registeredUsers){
             if(user[sort_by] == score){
@@ -41,6 +47,7 @@ function sortTable(){
         }
     }
 
+    // Generates table rows
     for (i = 0; i < sortedList.length; i++){
         var image_to_display;
 
