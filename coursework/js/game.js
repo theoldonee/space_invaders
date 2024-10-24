@@ -119,6 +119,7 @@ class Enemy{
     static children = [];
 
     static bullet = [];
+    static superBulletList = []
     static physics;
     static tweens;
 
@@ -126,14 +127,10 @@ class Enemy{
         this.type = type;
         this.health;
         this.object = Enemy.physics.add.sprite(x, 100,this.type).setScale(1.7);
-        this.isGreen = false;
         this.isRed = false;
-        this.tint;
-        this.flickerCount = 0;
-        this.flickerStop = 2;
-        this.greenCount = 0;
-        this.redCount = 0;
         this.form = 'normal';
+        this.blink = false;
+        this.count;
         this.createdTime = new Date();
         Enemy.setHealth(this);
         Enemy.addEnemy(this);
@@ -161,11 +158,20 @@ class Enemy{
         }
 
         if (enemyObject.type == "enemy_type_2"){
+
             this.enemyType2Children.push(enemyObject);
         }
 
         if (enemyObject.type == "enemy_type_3"){
+
+            // adds animation end event
+            enemyObject.object.on(Phaser.Animations.Events.ANIMATION_COMPLETE, function () {
+                enemyObject.shootSuper(player.x, player.y, enemyObject.object);
+                // enemyObject.jump();
+            }, Controller.classRef);
+
             this.enemyType3Children.push(enemyObject);
+
         }
     }
 
@@ -253,6 +259,15 @@ class Enemy{
         Enemy.setBulletVelocity(x, y, enemyBullet, 5);
     } 
 
+    // Shooting super bullet.
+    shootSuper(x, y, childObj){
+        var superBullet = Enemy.physics.add.sprite(childObj.x + 4, childObj.y + 18, "super_bullet").setScale(0.5);
+        Enemy.bullet.push(superBullet);
+        Enemy.superBulletList.push(superBullet);
+        Enemy.setBulletVelocity(x, y, superBullet, 0.3);
+    }
+
+
     // Retuns the lenght of time an enemy has been on screen
     getElapsedTime() {
         const now = new Date();
@@ -320,7 +335,7 @@ class Enemy{
         
     }
 
-
+    // Performs checks
     static check(){
 
         // Loads enemies if enemy list is empty
@@ -331,16 +346,33 @@ class Enemy{
         // Makes type 2 enemies jump every 5 seconds.
         this.enemyType2Children.forEach((child) => {
             if((child.getElapsedTime() + 1) % 5 == 0){
-                child.object.anims.play("jump");
                 child.jump();
+                child.object.anims.play("jump");
+                
             }
         });
 
         // Makes type 3 enemies blink every 8 seconds.
         this.enemyType3Children.forEach((child) => {
-            if((child.getElapsedTime() + 1) % 8 == 0){
-                child.object.anims.play("blink");
+            if(((child.getElapsedTime() + 1) % 8 == 0) && !(child.blink)){
+
+                // Checks if an object count isnt undefined or null
+                if (!(child.count)){
+                    child.count = Controller.count + 700;
+                    if (child.count > Controller.counterMax){
+                        child.count = child.count - Controller.counterMax;
+                    }
+                    child.blink = true;
+                    child.object.anims.play("blink");
+                }
             }
+
+            // Checks if object count is equivalent to currebt count
+            if (child.count == Controller.count){
+                child.blink = false;
+                child.count = null;
+            }
+
         });
         
     }
@@ -352,7 +384,9 @@ class Controller{
     static userEmail;
     static size = 200;
     static frameRate = 5; // Frame rate of animations
+    static classRef;
     static count = 0;
+    static counterMax = 3900;
     static start; // The time game started
     static powerupContact;
     static paused = false;
@@ -410,8 +444,13 @@ class Controller{
         this.physics = classClass;
     }
 
+    // sets Add class
     static setAdd(classClass){
         this.add = classClass;
+    }
+    //  sets game class reference
+    static setClassRef(classClass){
+        this.classRef = classClass;
     }
 
     // Checks if an explosion is displayed
@@ -470,8 +509,8 @@ class Controller{
         // checks if player is powered up
         if(this.isPoweredUp){
             this.endPowerupCount = this.count + 700;
-            if(this.endPowerupCount > 3900){
-                this.endPowerupCount = this.endPowerupCount - 3900;
+            if(this.endPowerupCount > Controller.counterMax){
+                this.endPowerupCount = this.endPowerupCount - Controller.counterMax;
             }
             this.isPoweredUp = false;
         }
@@ -539,7 +578,7 @@ class Controller{
             }
             
         });
-        
+
         Enemy.bullet.forEach((bullet_child) => {
             var index;
             index = Enemy.bullet.indexOf(bullet_child);
@@ -554,14 +593,22 @@ class Controller{
             if ((( player.x - 20 <= bullet_child.x) && (player.x + 20 >= bullet_child.x)) && 
                 (( bullet_child.y >=  player.y ) && (bullet_child.y <  player.y + 20))){
                     bullet_child.destroy();
-                    Enemy.bullet.splice(index, 1);
+                    if ( Enemy.superBulletList.includes(bullet_child)){
+                        var superIndex = Enemy.superBulletList.indexOf(bullet_child);
+                        Enemy.superBulletList.splice(superIndex, 1);
+                        Enemy.bullet.splice(index, 1);
+                        playerProperties.health -= 50;
+                    }else{
+                        Enemy.bullet.splice(index, 1);
+                        playerProperties.health -= 25;
+                    }
+                    
                     playerProperties.isRed = true;
-                    playerProperties.health -= 25;
                     this.flicker(playerProperties, "red");
             }
         
         }); 
-    
+
     }
 
     // Drops powerup
@@ -643,7 +690,7 @@ class Controller{
     }
 
     // Starts game over squence
-    static playerDead(classRef){
+    static playerDead(){
         if(this.flag){
             player.destroy();
             this.flag = false;
@@ -656,7 +703,7 @@ class Controller{
                     font: "100px Montserrat",
                     fill: "#ffffff",
                 });
-            }, classRef);
+            }, Controller.classRef);
 
             this.minutesElapsed = this.getMinutesElapsed();
             UserManager.updateUserInfo(
@@ -685,6 +732,7 @@ function preload ()
     this.load.spritesheet('jet_explosion', 'sprites/jet_explosion.png', { frameWidth: 32, frameHeight: 32 });
     this.load.spritesheet('bullet', 'sprites/bullets/jet_bullets.png', { frameWidth: 32, frameHeight: 32 });
     this.load.spritesheet('enemy_bullet', 'sprites/bullets/enemy_bullet.png', { frameWidth: 32, frameHeight: 32 });
+    this.load.image('super_bullet', 'sprites/bullets/super_bullet.png');
 
     this.load.image('health', 'sprites/powerups/health.png');
     this.load.spritesheet('upgrades', 'sprites/powerups/jet_upgrades.png', { frameWidth: 32, frameHeight: 33 });
@@ -704,6 +752,7 @@ function create ()
 
     Controller.setPhysics(this.physics);
     Controller.setAdd(this.add);
+    Controller.setClassRef(this);
     Controller.initializeStart();
 
     Powerups.setPhysics(this.physics);
@@ -901,20 +950,24 @@ function update ()
             }
         }
 
-        Controller.count++;
+        Controller.count++; // increments count
     
         Controller.checkBullets();
+
+        // checks if play should be red
         if (playerProperties.isRed){
             Controller.flicker(playerProperties, "red");
         }
         
+        // checks if player is alive
         if(playerProperties.health < 1){
-            Controller.playerDead(this);
+            Controller.playerDead();
         }
 
         Controller.checkPowerups();
-
-        if (Controller.count == 3900){
+ 
+        // Checks if current count is eqivalent to the maximum
+        if (Controller.count == Controller.counterMax){
             Controller.count = 0;
         }
 
