@@ -13,6 +13,7 @@
     />
   </head>
   <body>
+    <!-- Navigation bar -->
     <header>
       <nav>
         <ul>
@@ -28,9 +29,11 @@
         </ul>
       </nav>
     </header>
+    <!-- Holds Highscore Table -->
     <section>
       <h1>HIGHSCORES</h1>
       <div class="highscore_div">
+        <!-- Holds sorting options -->
         <div id="sort_div">
             <select name="Sort By" id="sort_by">
                 <option value="" disabled selected>Sort By</option>
@@ -39,10 +42,12 @@
                 <option value="enemiesKilled">Enemies Killed</option>
                 <option value="bulletsFired">Bullets Fired</option>
             </select>
+            <!-- Sort by button -->
             <button onclick="sortTable()">Sort</button>
         </div>
         <div id="highcore_data">
             <div id="table_div">
+              <!-- Highscore Table -->
                 <table>
                     <thead>
                         <tr>
@@ -61,6 +66,7 @@
         </div>
       </div>
     </section>
+    <!-- Footer -->
     <footer>
       <div>
         <span>Date: 20/09/2024</span>
